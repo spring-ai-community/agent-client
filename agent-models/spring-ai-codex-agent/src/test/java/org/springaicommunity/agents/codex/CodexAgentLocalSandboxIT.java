@@ -40,6 +40,10 @@ class CodexAgentLocalSandboxIT extends AbstractAgentModelTCK {
 
 	@BeforeEach
 	void setUp() {
+		// Codex CLI requires an OpenAI API key
+		String apiKey = System.getenv("OPENAI_API_KEY");
+		assumeTrue(apiKey != null && !apiKey.isBlank(), "OPENAI_API_KEY must be set for Codex integration tests");
+
 		try {
 			// Initialize git repository (Codex requires this)
 			new ProcessExecutor().command("git", "init").directory(tempDir.toFile()).execute();

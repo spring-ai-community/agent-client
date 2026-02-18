@@ -191,7 +191,7 @@ public class HelloWorldAgentAIRunnerIT {
 
 		// Act - Execute JBang launcher.java with invalid provider
 		ProcessResult result = new ProcessExecutor()
-			.command(getJBangExecutable(), launcherJavaPath.toString(), "hello-world-agent-ai",
+			.command(getJBangExecutable(), launcherJavaPath.toString(), "hello-world-agent-ai", "path=test.txt",
 					"provider=invalid-provider")
 			.directory(tempDir.toFile())
 			.timeout(30, TimeUnit.SECONDS)

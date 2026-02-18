@@ -19,6 +19,7 @@ package org.springaicommunity.agents.sweagentsdk;
 import org.springaicommunity.agents.sweagentsdk.transport.SweCliApi;
 import org.springaicommunity.agents.sweagentsdk.types.SweAgentOptions;
 import org.springaicommunity.agents.sweagentsdk.exceptions.SweSDKException;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -64,10 +65,8 @@ class SweCliApiIT extends BaseSweAgentIT {
 			sweCliApi = new SweCliApi();
 		}
 		catch (SweSDKException e) {
-			logger.warn("Failed to create SweCliApi: {}", e.getMessage());
-			// Don't set sweCliApi to null, let tests fail with clear message
-			// The @EnabledIf should prevent this scenario but if it happens,
-			// we want a clear error rather than NPE
+			logger.warn("SweCliApi not available, skipping: {}", e.getMessage());
+			Assumptions.assumeTrue(false, "mini-swe-agent CLI not available");
 		}
 	}
 

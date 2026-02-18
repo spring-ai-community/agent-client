@@ -16,10 +16,14 @@
 
 package org.springaicommunity.agents.ampsdk;
 
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.junit.jupiter.api.io.TempDir;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springaicommunity.agents.ampsdk.exceptions.AmpSDKException;
 import org.springaicommunity.agents.ampsdk.types.ExecuteOptions;
 import org.springaicommunity.agents.ampsdk.types.ExecuteResult;
 
@@ -46,6 +50,8 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 		disabledReason = "Amp CLI not available in CI environment")
 class AmpClientIT {
 
+	private static final Logger logger = LoggerFactory.getLogger(AmpClientIT.class);
+
 	private AmpClient client;
 
 	@TempDir
@@ -53,12 +59,18 @@ class AmpClientIT {
 
 	@BeforeEach
 	void setUp() {
-		ExecuteOptions options = ExecuteOptions.builder()
-			.dangerouslyAllowAll(true)
-			.timeout(Duration.ofMinutes(3))
-			.build();
+		try {
+			ExecuteOptions options = ExecuteOptions.builder()
+				.dangerouslyAllowAll(true)
+				.timeout(Duration.ofMinutes(3))
+				.build();
 
-		client = AmpClient.create(options, tempDir);
+			client = AmpClient.create(options, tempDir);
+		}
+		catch (AmpSDKException e) {
+			logger.warn("Amp CLI not available, skipping: {}", e.getMessage());
+			Assumptions.assumeTrue(false, "Amp CLI not available");
+		}
 
 		// Verify Amp CLI is available before running tests
 		assumeTrue(client.isAvailable(), "Amp CLI must be available for integration tests");

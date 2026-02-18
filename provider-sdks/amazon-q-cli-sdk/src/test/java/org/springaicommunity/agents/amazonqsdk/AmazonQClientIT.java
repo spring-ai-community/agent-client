@@ -16,10 +16,14 @@
 
 package org.springaicommunity.agents.amazonqsdk;
 
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.junit.jupiter.api.io.TempDir;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springaicommunity.agents.amazonqsdk.exceptions.AmazonQSDKException;
 import org.springaicommunity.agents.amazonqsdk.types.ExecuteOptions;
 import org.springaicommunity.agents.amazonqsdk.types.ExecuteResult;
 
@@ -39,6 +43,8 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 		disabledReason = "Amazon Q CLI authentication not available in CI environment")
 class AmazonQClientIT {
 
+	private static final Logger logger = LoggerFactory.getLogger(AmazonQClientIT.class);
+
 	@TempDir
 	Path tempDir;
 
@@ -46,7 +52,13 @@ class AmazonQClientIT {
 
 	@BeforeEach
 	void setUp() {
-		client = AmazonQClient.create(tempDir);
+		try {
+			client = AmazonQClient.create(tempDir);
+		}
+		catch (AmazonQSDKException e) {
+			logger.warn("Amazon Q CLI not available, skipping: {}", e.getMessage());
+			Assumptions.assumeTrue(false, "Amazon Q CLI not available");
+		}
 
 		// Skip tests if Amazon Q CLI is not available
 		assumeTrue(client.isAvailable(), "Amazon Q CLI must be available for integration tests");
