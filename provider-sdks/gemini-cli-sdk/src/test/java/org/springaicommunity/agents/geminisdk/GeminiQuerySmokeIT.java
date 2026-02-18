@@ -81,7 +81,7 @@ class GeminiQuerySmokeIT extends BaseGeminiIT {
 		client.connect(true);
 
 		CLIOptions options = CLIOptions.builder()
-			.model("gemini-pro")
+			.model("gemini-2.5-flash")
 			.timeout(Duration.ofSeconds(30))
 			.yoloMode(true)
 			.build();

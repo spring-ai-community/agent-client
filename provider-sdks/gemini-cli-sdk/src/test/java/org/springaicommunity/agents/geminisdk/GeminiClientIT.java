@@ -127,7 +127,7 @@ class GeminiClientIT extends BaseGeminiIT {
 	void testCustomConfiguration() throws GeminiSDKException {
 		// Test with flash model specifically
 		CLIOptions flashOptions = CLIOptions.builder()
-			.model("gemini-2.0-flash-exp")
+			.model("gemini-2.5-flash")
 			.yoloMode(true)
 			.timeout(Duration.ofMinutes(1))
 			.build();
@@ -164,7 +164,7 @@ class GeminiClientIT extends BaseGeminiIT {
 	@Test
 	void testGetOptions() throws GeminiSDKException {
 		CLIOptions testOptions = CLIOptions.builder()
-			.model("gemini-pro")
+			.model("gemini-2.5-flash")
 			.timeout(Duration.ofSeconds(30))
 			.yoloMode(false)
 			.build();
