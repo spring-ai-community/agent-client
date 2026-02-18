@@ -23,17 +23,19 @@ import org.slf4j.LoggerFactory;
 import org.springaicommunity.agents.sweagentsdk.exceptions.SweCliNotFoundException;
 import org.springaicommunity.agents.sweagentsdk.types.SweAgentOptions;
 import org.springaicommunity.agents.sweagentsdk.util.SweCliDiscovery;
+import org.zeroturnaround.exec.ProcessExecutor;
+import org.zeroturnaround.exec.ProcessResult;
 
-import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * API wrapper for the mini-SWE-agent CLI tool.
@@ -108,40 +110,24 @@ public class SweCliApi {
 			List<String> command = buildCommand(prompt, options, outputFile);
 			logger.debug("Executing mini-SWE-agent with command: {}", command);
 
-			ProcessBuilder processBuilder = new ProcessBuilder(command);
-			processBuilder.directory(workingDirectory.toFile());
-
-			// Set environment variables if provided
-			if (options.getEnvironmentVariables() != null) {
-				processBuilder.environment().putAll(options.getEnvironmentVariables());
-			}
-
-			Process process = processBuilder.start();
-
-			// Provide empty input to mini-swe-agent prompts
-			// This prevents hanging when the agent prompts for confirmation or new tasks
-			try (OutputStreamWriter writer = new OutputStreamWriter(process.getOutputStream())) {
-				// Send multiple empty lines to respond to various prompts
-				// (task confirmation, exit confirmation, new task prompts, etc.)
-				writer.write("\n\n\n");
-				writer.flush();
-			}
-			catch (IOException e) {
-				logger.debug("Failed to write to process stdin: {}", e.getMessage());
-			}
-
-			// Handle timeout
 			Duration timeout = options.getTimeout();
-			boolean finished = process.waitFor(timeout.toSeconds(), TimeUnit.SECONDS);
 
-			if (!finished) {
-				process.destroyForcibly();
-				throw new SweCliException("mini-SWE-agent execution timed out after " + timeout);
-			}
+			// Build zt-exec process with stdin providing empty lines to prevent
+			// hanging on interactive prompts.
+			// Redirect stderr into stdout so both are captured together.
+			ProcessResult result = new ProcessExecutor().command(command)
+				.directory(workingDirectory.toFile())
+				.environment(options.getEnvironmentVariables() != null ? options.getEnvironmentVariables()
+						: java.util.Collections.emptyMap())
+				.redirectInput(new ByteArrayInputStream("\n\n\n".getBytes(StandardCharsets.UTF_8)))
+				.readOutput(true)
+				.redirectErrorStream(true)
+				.timeout(timeout.toSeconds(), TimeUnit.SECONDS)
+				.execute();
 
-			int exitCode = process.exitValue();
-			String output = readOutput(process);
-			String error = readError(process);
+			int exitCode = result.getExitValue();
+			String output = result.outputUTF8().trim();
+			String error = "";
 
 			logger.debug("mini-SWE-agent completed with exit code: {}", exitCode);
 
@@ -161,6 +147,9 @@ public class SweCliApi {
 
 			return parseResult(output, error, exitCode, trajectoryJson);
 
+		}
+		catch (TimeoutException e) {
+			throw new SweCliException("mini-SWE-agent execution timed out after " + options.getTimeout(), e);
 		}
 		catch (IOException | InterruptedException e) {
 			Thread.currentThread().interrupt();
@@ -197,28 +186,6 @@ public class SweCliApi {
 		command.add("0.10"); // Very low cost limit to force early termination
 
 		return command;
-	}
-
-	private String readOutput(Process process) throws IOException {
-		StringBuilder output = new StringBuilder();
-		try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-			String line;
-			while ((line = reader.readLine()) != null) {
-				output.append(line).append("\n");
-			}
-		}
-		return output.toString().trim();
-	}
-
-	private String readError(Process process) throws IOException {
-		StringBuilder error = new StringBuilder();
-		try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
-			String line;
-			while ((line = reader.readLine()) != null) {
-				error.append(line).append("\n");
-			}
-		}
-		return error.toString().trim();
 	}
 
 	private SweResult parseResult(String output, String error, int exitCode, JsonNode trajectoryJson) {
