@@ -6,7 +6,7 @@
 
     <groupId>org.springaicommunity.agents</groupId>
     <artifactId>spring-ai-agents-parent</artifactId>
-    <version>0.9.0-SNAPSHOT</version>
+    <version>0.10.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Spring AI Agents Parent</name>
@@ -163,7 +163,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <!-- Spring AI Agents project versions -->
-        <spring-ai-agents.version>0.9.0-SNAPSHOT</spring-ai-agents.version>
+        <spring-ai-agents.version>0.10.0-SNAPSHOT</spring-ai-agents.version>
 
         <!-- Core dependency versions -->
         <spring-framework.version>6.2.6</spring-framework.version>
@@ -172,6 +172,11 @@
         <micrometer.version>1.12.2</micrometer.version>
         <reactor.version>2023.0.8</reactor.version>
         <slf4j.version>2.0.9</slf4j.version>
+
+        <!-- External SDK versions -->
+        <claude-code-sdk.version>1.0.0-SNAPSHOT</claude-code-sdk.version>
+        <agent-sandbox.version>0.9.0-SNAPSHOT</agent-sandbox.version>
+        <agent-judge.version>0.9.0-SNAPSHOT</agent-judge.version>
 
         <!-- Agent SDK specific versions -->
         <zt-exec.version>1.12</zt-exec.version>
@@ -289,19 +294,19 @@
             <dependency>
                 <groupId>org.springaicommunity</groupId>
                 <artifactId>agent-sandbox-core</artifactId>
-                <version>0.9.0-SNAPSHOT</version>
+                <version>${agent-sandbox.version}</version>
             </dependency>
 
             <!-- Agent Judge for evaluation framework -->
             <dependency>
                 <groupId>org.springaicommunity</groupId>
                 <artifactId>agent-judge-core</artifactId>
-                <version>0.9.0-SNAPSHOT</version>
+                <version>${agent-judge.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springaicommunity</groupId>
                 <artifactId>agent-judge-exec</artifactId>
-                <version>0.9.0-SNAPSHOT</version>
+                <version>${agent-judge.version}</version>
             </dependency>
 
             <!-- zt-exec for process execution (used by CLI SDKs) -->
@@ -313,14 +318,14 @@
             <dependency>
                 <groupId>org.springaicommunity</groupId>
                 <artifactId>agent-sandbox-core</artifactId>
-                <version>0.9.0-SNAPSHOT</version>
+                <version>${agent-sandbox.version}</version>
                 <type>test-jar</type>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.springaicommunity</groupId>
                 <artifactId>agent-sandbox-docker</artifactId>
-                <version>0.9.0-SNAPSHOT</version>
+                <version>${agent-sandbox.version}</version>
             </dependency>
 
             <!-- MCP Java SDK (Spring-independent core) -->
@@ -356,7 +361,7 @@
             <dependency>
                 <groupId>org.springaicommunity</groupId>
                 <artifactId>claude-code-sdk</artifactId>
-                <version>1.0.0-SNAPSHOT</version>
+                <version>${claude-code-sdk.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springaicommunity.agents</groupId>
