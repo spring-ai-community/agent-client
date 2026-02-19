@@ -20,8 +20,11 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import org.springaicommunity.agents.client.advisor.AgentModelCallAdvisor;
 import org.springaicommunity.agents.client.advisor.DefaultAgentCallAdvisorChain;
@@ -30,6 +33,8 @@ import org.springaicommunity.agents.model.AgentModel;
 import org.springaicommunity.agents.model.AgentOptions;
 import org.springaicommunity.agents.model.AgentResponse;
 import org.springaicommunity.agents.model.AgentTaskRequest;
+import org.springaicommunity.agents.model.mcp.McpServerCatalog;
+import org.springaicommunity.agents.model.mcp.McpServerDefinition;
 
 /**
  * Default implementation of AgentClient following Spring AI patterns.
@@ -45,12 +50,16 @@ public class DefaultAgentClient implements AgentClient {
 
 	private final List<AgentCallAdvisor> defaultAdvisors;
 
+	private final McpServerCatalog mcpServerCatalog;
+
+	private final List<String> defaultMcpServerNames;
+
 	/**
 	 * Create a new DefaultAgentClient with the given agent model.
 	 * @param agentModel the underlying agent model
 	 */
 	public DefaultAgentClient(AgentModel agentModel) {
-		this(agentModel, new DefaultAgentOptions(), new ArrayList<>());
+		this(agentModel, new DefaultAgentOptions(), new ArrayList<>(), null, List.of());
 	}
 
 	/**
@@ -59,7 +68,7 @@ public class DefaultAgentClient implements AgentClient {
 	 * @param defaultOptions default options for all requests
 	 */
 	public DefaultAgentClient(AgentModel agentModel, AgentOptions defaultOptions) {
-		this(agentModel, defaultOptions, new ArrayList<>());
+		this(agentModel, defaultOptions, new ArrayList<>(), null, List.of());
 	}
 
 	/**
@@ -71,9 +80,26 @@ public class DefaultAgentClient implements AgentClient {
 	 */
 	public DefaultAgentClient(AgentModel agentModel, AgentOptions defaultOptions,
 			List<AgentCallAdvisor> defaultAdvisors) {
+		this(agentModel, defaultOptions, defaultAdvisors, null, List.of());
+	}
+
+	/**
+	 * Create a new DefaultAgentClient with the given agent model, default options,
+	 * advisors, and MCP catalog.
+	 * @param agentModel the underlying agent model
+	 * @param defaultOptions default options for all requests
+	 * @param defaultAdvisors default advisors for all requests
+	 * @param mcpServerCatalog the MCP server catalog, may be null
+	 * @param defaultMcpServerNames default MCP server names for all requests
+	 */
+	public DefaultAgentClient(AgentModel agentModel, AgentOptions defaultOptions,
+			List<AgentCallAdvisor> defaultAdvisors, McpServerCatalog mcpServerCatalog,
+			List<String> defaultMcpServerNames) {
 		this.agentModel = Objects.requireNonNull(agentModel, "AgentModel cannot be null");
 		this.defaultOptions = defaultOptions != null ? defaultOptions : new DefaultAgentOptions();
 		this.defaultAdvisors = defaultAdvisors != null ? new ArrayList<>(defaultAdvisors) : new ArrayList<>();
+		this.mcpServerCatalog = mcpServerCatalog;
+		this.defaultMcpServerNames = defaultMcpServerNames != null ? List.copyOf(defaultMcpServerNames) : List.of();
 	}
 
 	@Override
@@ -105,7 +131,9 @@ public class DefaultAgentClient implements AgentClient {
 	@Override
 	public AgentClient.Builder mutate() {
 		return new DefaultAgentClientBuilder(this.agentModel).defaultOptions(this.defaultOptions)
-			.defaultAdvisors(this.defaultAdvisors);
+			.defaultAdvisors(this.defaultAdvisors)
+			.mcpServerCatalog(this.mcpServerCatalog)
+			.defaultMcpServers(this.defaultMcpServerNames);
 	}
 
 	/**
@@ -118,6 +146,8 @@ public class DefaultAgentClient implements AgentClient {
 		private Path workingDirectory;
 
 		private List<AgentCallAdvisor> requestAdvisors = new ArrayList<>();
+
+		private List<String> mcpServerNames = new ArrayList<>();
 
 		public DefaultAgentClientRequestSpec(Goal goal) {
 			this.goal = goal; // Can be null for goal() method
@@ -149,6 +179,22 @@ public class DefaultAgentClient implements AgentClient {
 		}
 
 		@Override
+		public AgentClientRequestSpec mcpServers(String... serverNames) {
+			if (serverNames != null) {
+				this.mcpServerNames.addAll(Arrays.asList(serverNames));
+			}
+			return this;
+		}
+
+		@Override
+		public AgentClientRequestSpec mcpServers(List<String> serverNames) {
+			if (serverNames != null) {
+				this.mcpServerNames.addAll(serverNames);
+			}
+			return this;
+		}
+
+		@Override
 		public AgentClientResponse run() {
 			// Ensure we have a goal before proceeding
 			if (this.goal == null) {
@@ -162,6 +208,9 @@ public class DefaultAgentClient implements AgentClient {
 			// Merge options
 			AgentOptions effectiveOptions = mergeOptions(this.goal.getOptions(),
 					DefaultAgentClient.this.defaultOptions);
+
+			// Resolve MCP server names to definitions via the catalog
+			effectiveOptions = resolveMcpServers(effectiveOptions);
 
 			// Create client-layer request
 			AgentClientRequest request = new AgentClientRequest(this.goal, effectiveWorkingDirectory, effectiveOptions,
@@ -214,6 +263,29 @@ public class DefaultAgentClient implements AgentClient {
 			// For now, just return goal options since merging complex
 			// TODO: Implement proper options merging if needed
 			return goalOptions;
+		}
+
+		private AgentOptions resolveMcpServers(AgentOptions options) {
+			// Union builder defaults + request spec names, deduplicated
+			Set<String> allNames = new LinkedHashSet<>(DefaultAgentClient.this.defaultMcpServerNames);
+			allNames.addAll(this.mcpServerNames);
+
+			if (allNames.isEmpty()) {
+				return options;
+			}
+
+			// Fail-fast: names present but no catalog
+			if (DefaultAgentClient.this.mcpServerCatalog == null) {
+				throw new IllegalStateException("MCP server names were requested " + allNames
+						+ " but no McpServerCatalog is configured on the AgentClient builder. "
+						+ "Use AgentClient.builder(model).mcpServerCatalog(catalog) to set one.");
+			}
+
+			// Resolve names to definitions
+			Map<String, McpServerDefinition> resolved = DefaultAgentClient.this.mcpServerCatalog.resolve(allNames);
+
+			// Build new options carrying the resolved definitions
+			return DefaultAgentOptions.builder().from(options).mcpServerDefinitions(resolved).build();
 		}
 
 	}

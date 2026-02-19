@@ -24,6 +24,7 @@ import java.util.function.Consumer;
 import org.springaicommunity.agents.client.advisor.api.AgentCallAdvisor;
 import org.springaicommunity.agents.model.AgentModel;
 import org.springaicommunity.agents.model.AgentOptions;
+import org.springaicommunity.agents.model.mcp.McpServerCatalog;
 
 /**
  * Client-level facade for agent interactions, following Spring AI's ChatClient pattern.
@@ -142,6 +143,24 @@ public interface AgentClient {
 		AgentClientRequestSpec advisors(List<AgentCallAdvisor> advisors);
 
 		/**
+		 * Select MCP servers by name for this request. Names are resolved against the
+		 * catalog at {@code run()} time. These are unioned with any default MCP servers
+		 * set on the builder.
+		 * @param serverNames the MCP server names to activate
+		 * @return this request spec for chaining
+		 */
+		AgentClientRequestSpec mcpServers(String... serverNames);
+
+		/**
+		 * Select MCP servers by name for this request. Names are resolved against the
+		 * catalog at {@code run()} time. These are unioned with any default MCP servers
+		 * set on the builder.
+		 * @param serverNames the MCP server names to activate
+		 * @return this request spec for chaining
+		 */
+		AgentClientRequestSpec mcpServers(List<String> serverNames);
+
+		/**
 		 * Execute the agent task and return the result.
 		 *
 		 * In agent terminology, we **run a goal** (task execution). This differs from
@@ -191,6 +210,27 @@ public interface AgentClient {
 		 * @return this builder for chaining
 		 */
 		Builder defaultAdvisor(AgentCallAdvisor advisor);
+
+		/**
+		 * Set the MCP server catalog for resolving server names to definitions.
+		 * @param catalog the MCP server catalog
+		 * @return this builder for chaining
+		 */
+		Builder mcpServerCatalog(McpServerCatalog catalog);
+
+		/**
+		 * Set default MCP server names applied to every request.
+		 * @param serverNames the default server names
+		 * @return this builder for chaining
+		 */
+		Builder defaultMcpServers(String... serverNames);
+
+		/**
+		 * Set default MCP server names applied to every request.
+		 * @param serverNames the default server names
+		 * @return this builder for chaining
+		 */
+		Builder defaultMcpServers(List<String> serverNames);
 
 		/**
 		 * Create a new {@link AgentClient} with the configured defaults.

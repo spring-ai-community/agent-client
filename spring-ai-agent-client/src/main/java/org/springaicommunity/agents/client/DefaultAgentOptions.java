@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springaicommunity.agents.model.AgentOptions;
+import org.springaicommunity.agents.model.mcp.McpServerDefinition;
 
 /**
  * Default implementation of {@link AgentOptions} for use in client layer.
@@ -39,6 +40,8 @@ public class DefaultAgentOptions implements AgentOptions {
 	private String model;
 
 	private Map<String, Object> extras = new HashMap<>();
+
+	private Map<String, McpServerDefinition> mcpServerDefinitions = Map.of();
 
 	public DefaultAgentOptions() {
 	}
@@ -77,6 +80,11 @@ public class DefaultAgentOptions implements AgentOptions {
 		return this.extras;
 	}
 
+	@Override
+	public Map<String, McpServerDefinition> getMcpServerDefinitions() {
+		return this.mcpServerDefinitions;
+	}
+
 	public void setWorkingDirectory(String workingDirectory) {
 		this.workingDirectory = workingDirectory;
 	}
@@ -97,6 +105,10 @@ public class DefaultAgentOptions implements AgentOptions {
 		this.extras = extras != null ? extras : new HashMap<>();
 	}
 
+	public void setMcpServerDefinitions(Map<String, McpServerDefinition> mcpServerDefinitions) {
+		this.mcpServerDefinitions = mcpServerDefinitions != null ? Map.copyOf(mcpServerDefinitions) : Map.of();
+	}
+
 	public static Builder builder() {
 		return new Builder();
 	}
@@ -112,6 +124,8 @@ public class DefaultAgentOptions implements AgentOptions {
 		private String model;
 
 		private Map<String, Object> extras = new HashMap<>();
+
+		private Map<String, McpServerDefinition> mcpServerDefinitions = Map.of();
 
 		public Builder workingDirectory(String workingDirectory) {
 			this.workingDirectory = workingDirectory;
@@ -139,6 +153,12 @@ public class DefaultAgentOptions implements AgentOptions {
 			return this;
 		}
 
+		public Builder mcpServerDefinitions(Map<String, McpServerDefinition> mcpServerDefinitions) {
+			this.mcpServerDefinitions = mcpServerDefinitions != null ? Map.copyOf(mcpServerDefinitions) : Map.of();
+			return this;
+		}
+
+		// IMPORTANT: When adding fields to DefaultAgentOptions, update this method.
 		public Builder from(AgentOptions agentOptions) {
 			if (agentOptions != null) {
 				this.workingDirectory = agentOptions.getWorkingDirectory();
@@ -148,6 +168,8 @@ public class DefaultAgentOptions implements AgentOptions {
 				this.model = agentOptions.getModel();
 				this.extras = agentOptions.getExtras() != null ? new HashMap<>(agentOptions.getExtras())
 						: new HashMap<>();
+				this.mcpServerDefinitions = agentOptions.getMcpServerDefinitions() != null
+						? agentOptions.getMcpServerDefinitions() : Map.of();
 			}
 			return this;
 		}
@@ -159,6 +181,7 @@ public class DefaultAgentOptions implements AgentOptions {
 			options.setEnvironmentVariables(this.environmentVariables);
 			options.setModel(this.model);
 			options.setExtras(this.extras);
+			options.setMcpServerDefinitions(this.mcpServerDefinitions);
 			return options;
 		}
 

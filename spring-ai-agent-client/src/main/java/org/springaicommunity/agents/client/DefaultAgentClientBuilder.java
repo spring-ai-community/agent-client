@@ -19,12 +19,14 @@ package org.springaicommunity.agents.client;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
 import org.springaicommunity.agents.client.advisor.api.AgentCallAdvisor;
 import org.springaicommunity.agents.model.AgentModel;
 import org.springaicommunity.agents.model.AgentOptions;
+import org.springaicommunity.agents.model.mcp.McpServerCatalog;
 
 /**
  * Default implementation of {@link AgentClient.Builder}.
@@ -39,6 +41,10 @@ public class DefaultAgentClientBuilder implements AgentClient.Builder {
 	private AgentOptions defaultOptions;
 
 	private List<AgentCallAdvisor> defaultAdvisors;
+
+	private McpServerCatalog mcpServerCatalog;
+
+	private List<String> defaultMcpServerNames = new ArrayList<>();
 
 	public DefaultAgentClientBuilder(AgentModel agentModel) {
 		this.agentModel = Objects.requireNonNull(agentModel, "AgentModel cannot be null");
@@ -84,8 +90,28 @@ public class DefaultAgentClientBuilder implements AgentClient.Builder {
 	}
 
 	@Override
+	public AgentClient.Builder mcpServerCatalog(McpServerCatalog catalog) {
+		this.mcpServerCatalog = catalog;
+		return this;
+	}
+
+	@Override
+	public AgentClient.Builder defaultMcpServers(String... serverNames) {
+		this.defaultMcpServerNames = serverNames != null ? new ArrayList<>(Arrays.asList(serverNames))
+				: new ArrayList<>();
+		return this;
+	}
+
+	@Override
+	public AgentClient.Builder defaultMcpServers(List<String> serverNames) {
+		this.defaultMcpServerNames = serverNames != null ? new ArrayList<>(serverNames) : new ArrayList<>();
+		return this;
+	}
+
+	@Override
 	public AgentClient build() {
-		return new DefaultAgentClient(this.agentModel, this.defaultOptions, this.defaultAdvisors);
+		return new DefaultAgentClient(this.agentModel, this.defaultOptions, this.defaultAdvisors, this.mcpServerCatalog,
+				this.defaultMcpServerNames);
 	}
 
 }
