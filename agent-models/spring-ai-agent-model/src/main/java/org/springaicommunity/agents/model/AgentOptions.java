@@ -16,6 +16,7 @@
 
 package org.springaicommunity.agents.model;
 
+import org.springaicommunity.agents.model.mcp.McpServerDefinition;
 import org.springframework.ai.model.ModelOptions;
 
 import java.time.Duration;
@@ -44,7 +45,7 @@ public interface AgentOptions extends ModelOptions {
 	Duration getTimeout();
 
 	/**
-	 * wh Get environment variables for agent execution.
+	 * Get environment variables for agent execution.
 	 * @return map of environment variables
 	 */
 	Map<String, String> getEnvironmentVariables();
@@ -60,6 +61,17 @@ public interface AgentOptions extends ModelOptions {
 	 * @return map of extra options
 	 */
 	default Map<String, Object> getExtras() {
+		return Map.of();
+	}
+
+	/**
+	 * Get the resolved MCP server definitions. This map contains definitions that have
+	 * been resolved by the client layer (e.g., from a catalog) and are ready for
+	 * translation by the model layer. This is not a user declaration — it is populated by
+	 * the {@code AgentClient} at request time.
+	 * @return unmodifiable map of server name to resolved definition, empty by default
+	 */
+	default Map<String, McpServerDefinition> getMcpServerDefinitions() {
 		return Map.of();
 	}
 
