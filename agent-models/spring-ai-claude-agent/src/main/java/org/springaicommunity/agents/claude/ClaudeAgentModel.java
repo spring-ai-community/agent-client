@@ -23,6 +23,7 @@ import org.springaicommunity.claude.agent.sdk.ClaudeSyncClient;
 import org.springaicommunity.claude.agent.sdk.hooks.HookCallback;
 import org.springaicommunity.claude.agent.sdk.hooks.HookRegistry;
 import org.springaicommunity.claude.agent.sdk.parsing.ParsedMessage;
+import org.springaicommunity.claude.agent.sdk.mcp.McpServerConfig;
 import org.springaicommunity.claude.agent.sdk.transport.CLIOptions;
 import org.springaicommunity.claude.agent.sdk.types.AssistantMessage;
 import org.springaicommunity.claude.agent.sdk.types.Message;
@@ -30,11 +31,13 @@ import org.springaicommunity.claude.agent.sdk.types.ResultMessage;
 import org.springaicommunity.agents.model.AgentGeneration;
 import org.springaicommunity.agents.model.AgentGenerationMetadata;
 import org.springaicommunity.agents.model.AgentModel;
+import org.springaicommunity.agents.model.AgentOptions;
 import org.springaicommunity.agents.model.AgentResponse;
 import org.springaicommunity.agents.model.AgentResponseMetadata;
 import org.springaicommunity.agents.model.AgentTaskRequest;
 import org.springaicommunity.agents.model.IterableAgentModel;
 import org.springaicommunity.agents.model.StreamingAgentModel;
+import org.springaicommunity.agents.model.mcp.McpServerDefinition;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 
@@ -42,6 +45,7 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
@@ -488,9 +492,31 @@ public class ClaudeAgentModel implements AgentModel, StreamingAgentModel, Iterab
 			builder.jsonSchema(options.getJsonSchema());
 		}
 
-		// MCP servers
-		if (options.getMcpServers() != null && !options.getMcpServers().isEmpty()) {
-			builder.mcpServers(options.getMcpServers());
+		// MCP servers: merge portable definitions (from AgentOptions) with
+		// Claude-specific
+		// servers. Portable fields (e.g., MCP definitions) are read from
+		// request.options()
+		// via the AgentOptions interface. This bypasses getEffectiveOptions() which
+		// requires
+		// ClaudeAgentOptions. Claude-specific fields continue to go through
+		// getEffectiveOptions().
+		Map<String, McpServerConfig> mergedMcpServers = new LinkedHashMap<>();
+
+		// First: portable definitions translated from the catalog (lower precedence)
+		AgentOptions portableOptions = request.options();
+		if (portableOptions != null && portableOptions.getMcpServerDefinitions() != null) {
+			for (Map.Entry<String, McpServerDefinition> entry : portableOptions.getMcpServerDefinitions().entrySet()) {
+				mergedMcpServers.put(entry.getKey(), toClaudeMcpServerConfig(entry.getValue()));
+			}
+		}
+
+		// Then: Claude-specific servers override by name (higher precedence)
+		if (options.getMcpServers() != null) {
+			mergedMcpServers.putAll(options.getMcpServers());
+		}
+
+		if (!mergedMcpServers.isEmpty()) {
+			builder.mcpServers(mergedMcpServers);
 		}
 
 		// Budget control
@@ -538,6 +564,20 @@ public class ClaudeAgentModel implements AgentModel, StreamingAgentModel, Iterab
 		prompt.append("2. Complete the requested task by making necessary changes\n");
 		prompt.append("3. Ensure the changes fix the problem\n\n");
 		return prompt.toString();
+	}
+
+	// Package-private for testing
+	McpServerConfig toClaudeMcpServerConfig(McpServerDefinition definition) {
+		if (definition instanceof McpServerDefinition.StdioDefinition stdio) {
+			return new McpServerConfig.McpStdioServerConfig(stdio.command(), stdio.args(), stdio.env());
+		}
+		else if (definition instanceof McpServerDefinition.SseDefinition sse) {
+			return new McpServerConfig.McpSseServerConfig(sse.url(), sse.headers());
+		}
+		else if (definition instanceof McpServerDefinition.HttpDefinition http) {
+			return new McpServerConfig.McpHttpServerConfig(http.url(), http.headers());
+		}
+		throw new IllegalArgumentException("Unknown McpServerDefinition type: " + definition.getClass());
 	}
 
 	private AgentResponse createErrorResponse(String errorMessage, Duration duration) {
