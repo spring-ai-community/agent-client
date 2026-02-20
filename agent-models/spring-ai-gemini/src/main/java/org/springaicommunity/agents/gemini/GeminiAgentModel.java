@@ -23,22 +23,25 @@ import org.springaicommunity.agents.geminisdk.types.QueryResult;
 import org.springaicommunity.agents.geminisdk.types.ResultStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springaicommunity.agents.model.AgentResponse;
-import org.springaicommunity.agents.model.AgentResponseMetadata;
+import org.springaicommunity.agents.geminisdk.transport.CLITransport;
 import org.springaicommunity.agents.model.AgentGeneration;
 import org.springaicommunity.agents.model.AgentGenerationMetadata;
 import org.springaicommunity.agents.model.AgentModel;
+import org.springaicommunity.agents.model.AgentOptions;
+import org.springaicommunity.agents.model.AgentResponse;
+import org.springaicommunity.agents.model.AgentResponseMetadata;
 import org.springaicommunity.agents.model.AgentTaskRequest;
+import org.springaicommunity.agents.model.mcp.McpServerDefinition;
 import org.springaicommunity.sandbox.ExecResult;
 import org.springaicommunity.sandbox.ExecSpec;
 import org.springaicommunity.sandbox.Sandbox;
 
 import java.io.IOException;
-import java.util.Map;
-
+import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -86,6 +89,7 @@ public class GeminiAgentModel implements AgentModel {
 		logger.debug("Executing agent task: {}", request.goal());
 
 		Instant startTime = Instant.now();
+		Path mcpSettingsFile = null;
 
 		try {
 			// Connect if needed
@@ -93,6 +97,14 @@ public class GeminiAgentModel implements AgentModel {
 
 			// Build CLI options from request
 			CLIOptions cliOptions = buildCLIOptions(request);
+
+			// Write MCP settings file if MCP servers are configured
+			if (!cliOptions.getMcpServers().isEmpty()) {
+				Path workDir = request.workingDirectory();
+				mcpSettingsFile = CLITransport.writeMcpSettings(workDir, cliOptions.getMcpServers());
+				logger.info("Wrote MCP settings for {} servers to {}", cliOptions.getMcpServers().size(),
+						mcpSettingsFile);
+			}
 
 			// Format the task as a prompt
 			String prompt = formatTaskPrompt(request);
@@ -120,6 +132,9 @@ public class GeminiAgentModel implements AgentModel {
 			logger.error("Unexpected error during agent execution", e);
 			Duration duration = Duration.between(startTime, Instant.now());
 			return createErrorResponse("Unexpected error: " + e.getMessage(), duration);
+		}
+		finally {
+			CLITransport.cleanupMcpSettings(mcpSettingsFile);
 		}
 	}
 
@@ -228,8 +243,19 @@ public class GeminiAgentModel implements AgentModel {
 		// Set yolo mode for autonomous operation
 		builder.yoloMode(options.isYolo());
 
-		// Note: Gemini CLI doesn't support temperature/maxTokens configuration
-		// These would need to be handled at the model API level if supported
+		// MCP servers: translate portable definitions to Gemini format
+		Map<String, Object> mcpServers = new LinkedHashMap<>();
+
+		AgentOptions portableOptions = request.options();
+		if (portableOptions != null && portableOptions.getMcpServerDefinitions() != null) {
+			for (Map.Entry<String, McpServerDefinition> entry : portableOptions.getMcpServerDefinitions().entrySet()) {
+				mcpServers.put(entry.getKey(), toGeminiMcpConfig(entry.getValue()));
+			}
+		}
+
+		if (!mcpServers.isEmpty()) {
+			builder.mcpServers(mcpServers);
+		}
 
 		return builder.build();
 	}
@@ -320,6 +346,38 @@ public class GeminiAgentModel implements AgentModel {
 	/**
 	 * Converts Gemini CLI ResultStatus to finish reason string.
 	 */
+	// Package-private for testing
+	Map<String, Object> toGeminiMcpConfig(McpServerDefinition definition) {
+		if (definition instanceof McpServerDefinition.StdioDefinition stdio) {
+			Map<String, Object> config = new LinkedHashMap<>();
+			config.put("command", stdio.command());
+			if (!stdio.args().isEmpty()) {
+				config.put("args", stdio.args());
+			}
+			if (!stdio.env().isEmpty()) {
+				config.put("env", stdio.env());
+			}
+			return config;
+		}
+		else if (definition instanceof McpServerDefinition.SseDefinition sse) {
+			Map<String, Object> config = new LinkedHashMap<>();
+			config.put("url", sse.url());
+			if (!sse.headers().isEmpty()) {
+				config.put("headers", sse.headers());
+			}
+			return config;
+		}
+		else if (definition instanceof McpServerDefinition.HttpDefinition http) {
+			Map<String, Object> config = new LinkedHashMap<>();
+			config.put("url", http.url());
+			if (!http.headers().isEmpty()) {
+				config.put("headers", http.headers());
+			}
+			return config;
+		}
+		throw new IllegalArgumentException("Unknown McpServerDefinition type: " + definition.getClass());
+	}
+
 	private String convertStatusToFinishReason(ResultStatus cliStatus) {
 		return switch (cliStatus) {
 			case SUCCESS -> "SUCCESS";
