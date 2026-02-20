@@ -18,6 +18,8 @@ package org.springaicommunity.agents.gemini;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.condition.EnabledIf;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springaicommunity.agents.geminisdk.GeminiClient;
 import org.springaicommunity.agents.geminisdk.exceptions.GeminiSDKException;
 import org.springaicommunity.agents.geminisdk.transport.CLIOptions;
@@ -53,6 +55,8 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 @EnabledIf("hasGeminiApiKey")
 class GeminiLocalSandboxIT extends AbstractAgentModelTCK {
 
+	private static final Logger logger = LoggerFactory.getLogger(GeminiLocalSandboxIT.class);
+
 	/**
 	 * Check if either GEMINI_API_KEY or GOOGLE_API_KEY is available.
 	 */
@@ -86,6 +90,7 @@ class GeminiLocalSandboxIT extends AbstractAgentModelTCK {
 			assumeTrue(agentModel.isAvailable(), "Gemini CLI must be available for integration tests");
 		}
 		catch (GeminiSDKException e) {
+			logger.error("Failed to initialize Gemini CLI", e);
 			assumeTrue(false, "Failed to initialize Gemini CLI: " + e.getMessage());
 		}
 	}

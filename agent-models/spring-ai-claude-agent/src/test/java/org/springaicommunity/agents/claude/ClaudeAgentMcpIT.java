@@ -183,6 +183,7 @@ class ClaudeAgentMcpIT {
 			return ClaudeCliDiscovery.isClaudeCliAvailable();
 		}
 		catch (Exception ex) {
+			logger.error("Claude CLI availability check failed", ex);
 			return false;
 		}
 	}

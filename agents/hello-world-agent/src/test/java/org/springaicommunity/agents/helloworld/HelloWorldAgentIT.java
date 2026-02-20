@@ -16,40 +16,109 @@
 
 package org.springaicommunity.agents.helloworld;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
+
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.zeroturnaround.exec.ProcessExecutor;
 import org.zeroturnaround.exec.ProcessResult;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.concurrent.TimeUnit;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Integration test for HelloWorldAgent via JBang agents.java launcher. Tests the
- * end-to-end JBang runner functionality with the hello-world agent.
+ * Integration test for HelloWorldAgent via JBang launcher. Tests end-to-end JBang runner
+ * functionality with the hello-world agent.
  *
  * @author Mark Pollack
  * @since 1.1.0
  */
 public class HelloWorldAgentIT {
 
+	private static final Logger logger = LoggerFactory.getLogger(HelloWorldAgentIT.class);
+
 	@TempDir
 	Path tempDir;
 
-	/**
-	 * Get the launcher.java file path in the jbang directory.
-	 */
+	static Stream<Arguments> contentVariants() {
+		return Stream.of(
+				Arguments.of("custom-test.txt", "Hello from integration test!", "Hello from integration test!"),
+				Arguments.of("default-test.txt", null, "HelloWorld"));
+	}
+
+	@ParameterizedTest(name = "content={1}")
+	@MethodSource("contentVariants")
+	@DisplayName("JBang launcher creates file with expected content")
+	void launcherCreatesFileWithContent(String fileName, String content, String expectedContent) throws Exception {
+		Path launcherJavaPath = getLauncherJavaFile();
+		Path expectedFile = this.tempDir.resolve(fileName);
+
+		List<String> command = new ArrayList<>();
+		command.add(getJBangExecutable());
+		command.add(launcherJavaPath.toString());
+		command.add("hello-world");
+		command.add("path=" + fileName);
+		if (content != null) {
+			command.add("content=" + content);
+		}
+
+		ProcessResult result = new ProcessExecutor().command(command)
+			.directory(this.tempDir.toFile())
+			.timeout(30, TimeUnit.SECONDS)
+			.readOutput(true)
+			.execute();
+
+		logger.info("JBang output: {}", result.outputUTF8());
+		assertThat(result.getExitValue()).as("JBang exit code").isZero();
+		assertThat(expectedFile).exists();
+		assertThat(Files.readString(expectedFile)).isEqualTo(expectedContent);
+	}
+
+	@Test
+	@DisplayName("Missing required input fails gracefully")
+	void missingRequiredInputFails() throws Exception {
+		Path launcherJavaPath = getLauncherJavaFile();
+
+		ProcessResult result = new ProcessExecutor()
+			.command(getJBangExecutable(), launcherJavaPath.toString(), "hello-world", "content=test content")
+			.directory(this.tempDir.toFile())
+			.timeout(30, TimeUnit.SECONDS)
+			.readOutput(true)
+			.execute();
+
+		assertThat(result.getExitValue()).as("Should fail for missing required input").isNotZero();
+	}
+
+	@Test
+	@DisplayName("Unknown agent fails gracefully")
+	void unknownAgentFails() throws Exception {
+		Path launcherJavaPath = getLauncherJavaFile();
+
+		ProcessResult result = new ProcessExecutor()
+			.command(getJBangExecutable(), launcherJavaPath.toString(), "unknown-agent")
+			.directory(this.tempDir.toFile())
+			.timeout(30, TimeUnit.SECONDS)
+			.readOutput(true)
+			.execute();
+
+		assertThat(result.getExitValue()).as("Should fail for unknown agent").isNotZero();
+	}
+
 	private Path getLauncherJavaFile() {
-		// Find project root by walking up directories looking for jbang/launcher.java
 		Path current = Path.of(System.getProperty("user.dir"));
 		for (int i = 0; i < 5; i++) {
 			Path launcherJava = current.resolve("jbang/launcher.java");
 			if (Files.exists(launcherJava)) {
-				// Found project root with jbang/launcher.java
 				return launcherJava;
 			}
 			current = current.getParent();
@@ -60,121 +129,12 @@ public class HelloWorldAgentIT {
 		throw new RuntimeException("Could not find jbang/launcher.java in project root");
 	}
 
-	/**
-	 * Get the JBang executable path.
-	 */
 	private String getJBangExecutable() {
 		String jbangHome = System.getenv("JBANG_HOME");
-		System.out.println("jbang home " + jbangHome);
 		if (jbangHome != null) {
 			return jbangHome + "/bin/jbang";
 		}
-		// Fallback to PATH lookup
 		return "jbang";
-	}
-
-	@Test
-	void testJBangAgentsLauncherWithHelloWorld() throws Exception {
-		// Arrange
-		String testContent = "Hello from integration test!";
-		String fileName = "integration-test.txt";
-		Path expectedFile = tempDir.resolve(fileName);
-
-		// Get the launcher.java file in jbang directory
-		Path launcherJavaPath = getLauncherJavaFile();
-
-		// Act - Execute JBang launcher.java with hello-world agent using zt-exec
-		ProcessResult result = new ProcessExecutor()
-			.command(getJBangExecutable(), launcherJavaPath.toString(), "hello-world", "path=" + fileName,
-					"content=" + testContent)
-			.directory(tempDir.toFile())
-			.timeout(30, TimeUnit.SECONDS)
-			.readOutput(true)
-			.execute();
-
-		// Debug output if test fails
-		if (result.getExitValue() != 0) {
-			System.out.println("JBang output:");
-			System.out.println(result.outputUTF8());
-		}
-
-		// Assert
-		assertEquals(0, result.getExitValue(),
-				"JBang process should exit successfully. Output: " + result.outputUTF8());
-
-		// Verify file was created with correct content
-		assertTrue(Files.exists(expectedFile), "Output file should be created");
-		String actualContent = Files.readString(expectedFile);
-		assertEquals(testContent, actualContent, "File content should match expected");
-	}
-
-	@Test
-	void testJBangAgentsLauncherWithDefaultContent() throws Exception {
-		// Arrange
-		String fileName = "default-content-test.txt";
-		Path expectedFile = tempDir.resolve(fileName);
-
-		// Get the launcher.java file in jbang directory
-		Path launcherJavaPath = getLauncherJavaFile();
-
-		// Act - Execute JBang launcher.java with hello-world agent (using default
-		// content)
-		ProcessResult result = new ProcessExecutor()
-			.command(getJBangExecutable(), launcherJavaPath.toString(), "hello-world", "path=" + fileName)
-			.directory(tempDir.toFile())
-			.timeout(30, TimeUnit.SECONDS)
-			.readOutput(true)
-			.execute();
-
-		// Debug output if test fails
-		if (result.getExitValue() != 0) {
-			System.out.println("JBang output:");
-			System.out.println(result.outputUTF8());
-		}
-
-		// Assert
-		assertEquals(0, result.getExitValue(),
-				"JBang process should exit successfully. Output: " + result.outputUTF8());
-
-		// Verify file was created with default content
-		assertTrue(Files.exists(expectedFile), "Output file should be created");
-		String actualContent = Files.readString(expectedFile);
-		assertEquals("HelloWorld", actualContent, "File content should use default value");
-	}
-
-	@Test
-	void testJBangAgentsLauncherMissingRequiredInput() throws Exception {
-		// Get the launcher.java file in jbang directory
-		Path launcherJavaPath = getLauncherJavaFile();
-
-		// Act - Execute JBang launcher.java with hello-world agent but missing required
-		// 'path' input
-		ProcessResult result = new ProcessExecutor()
-			.command(getJBangExecutable(), launcherJavaPath.toString(), "hello-world", "content=test content")
-			.directory(tempDir.toFile())
-			.timeout(30, TimeUnit.SECONDS)
-			.readOutput(true)
-			.execute();
-
-		// Assert - Should fail due to missing required input
-		assertNotEquals(0, result.getExitValue(), "JBang process should exit with error code");
-	}
-
-	@Test
-	void testJBangAgentsLauncherUnknownAgent() throws Exception {
-		// Get the launcher.java file in jbang directory
-		Path launcherJavaPath = getLauncherJavaFile();
-
-		// Act - Execute JBang launcher.java with unknown agent
-		ProcessResult result = new ProcessExecutor()
-			.command(getJBangExecutable(), launcherJavaPath.toString(), "unknown-agent")
-			.directory(tempDir.toFile())
-			.timeout(30, TimeUnit.SECONDS)
-			.readOutput(true)
-			.execute();
-
-		// Assert - Should fail due to unknown agent
-		assertNotEquals(0, result.getExitValue(), "JBang process should exit with error code");
 	}
 
 }
