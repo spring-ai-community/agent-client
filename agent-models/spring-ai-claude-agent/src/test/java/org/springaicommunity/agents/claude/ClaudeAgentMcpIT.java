@@ -25,7 +25,6 @@ import java.util.Map;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -56,12 +55,11 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
  * </p>
  *
  * <p>
- * <strong>TODO:</strong> Claude CLI returns empty stdout when invoked from within a
- * Claude Code session (even with CLAUDECODE unset). Needs investigation — possibly a CLI
- * 2.1.49 regression or session environment leak. Enable once resolved.
+ * <strong>Note:</strong> Cannot run from within a Claude Code session (nesting guard
+ * added in CLI 2.1.39). Run from terminal or CI. The SDK's env whitelist in
+ * {@code StreamingTransport} prevents {@code CLAUDECODE} leaking to the subprocess.
  * </p>
  */
-@Disabled("Claude CLI returns empty output when invoked from within Claude Code session — needs investigation")
 class ClaudeAgentMcpIT {
 
 	private static final Logger logger = LoggerFactory.getLogger(ClaudeAgentMcpIT.class);
