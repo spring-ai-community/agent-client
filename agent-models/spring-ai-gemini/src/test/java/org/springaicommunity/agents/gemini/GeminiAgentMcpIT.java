@@ -33,10 +33,10 @@ import org.slf4j.LoggerFactory;
 import org.springaicommunity.agents.geminisdk.GeminiClient;
 import org.springaicommunity.agents.geminisdk.transport.CLIOptions;
 import org.springaicommunity.agents.geminisdk.util.GeminiCliDiscovery;
-import org.springaicommunity.agents.model.AgentOptions;
 import org.springaicommunity.agents.model.AgentResponse;
 import org.springaicommunity.agents.model.AgentTaskRequest;
 import org.springaicommunity.agents.model.mcp.McpServerDefinition;
+import org.springaicommunity.agents.tck.PortableMcpAgentOptions;
 import org.springaicommunity.sandbox.LocalSandbox;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -107,7 +107,7 @@ class GeminiAgentMcpIT {
 
 		logger.info("MCP definitions: {}", mcpDefinitions.keySet());
 
-		AgentOptions optionsWithMcp = new PortableMcpAgentOptions(mcpDefinitions);
+		PortableMcpAgentOptions optionsWithMcp = new PortableMcpAgentOptions(mcpDefinitions);
 
 		AgentTaskRequest request = AgentTaskRequest
 			.builder("Say hello. Keep your response to one sentence.", this.testWorkspace)
@@ -130,49 +130,6 @@ class GeminiAgentMcpIT {
 
 	private static boolean hasApiKey() {
 		return System.getenv("GEMINI_API_KEY") != null || System.getenv("GOOGLE_API_KEY") != null;
-	}
-
-	/**
-	 * Minimal AgentOptions that carries portable MCP definitions for testing.
-	 */
-	private static final class PortableMcpAgentOptions implements AgentOptions {
-
-		private final Map<String, McpServerDefinition> mcpDefinitions;
-
-		PortableMcpAgentOptions(Map<String, McpServerDefinition> mcpDefinitions) {
-			this.mcpDefinitions = mcpDefinitions;
-		}
-
-		@Override
-		public String getWorkingDirectory() {
-			return null;
-		}
-
-		@Override
-		public Duration getTimeout() {
-			return null;
-		}
-
-		@Override
-		public Map<String, String> getEnvironmentVariables() {
-			return Map.of();
-		}
-
-		@Override
-		public String getModel() {
-			return null;
-		}
-
-		@Override
-		public Map<String, Object> getExtras() {
-			return Map.of();
-		}
-
-		@Override
-		public Map<String, McpServerDefinition> getMcpServerDefinitions() {
-			return this.mcpDefinitions;
-		}
-
 	}
 
 }

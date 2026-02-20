@@ -19,7 +19,6 @@ package org.springaicommunity.agents.claude;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
@@ -31,10 +30,10 @@ import org.junit.jupiter.api.io.TempDir;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springaicommunity.agents.model.AgentOptions;
 import org.springaicommunity.agents.model.AgentResponse;
 import org.springaicommunity.agents.model.AgentTaskRequest;
 import org.springaicommunity.agents.model.mcp.McpServerDefinition;
+import org.springaicommunity.agents.tck.PortableMcpAgentOptions;
 import org.springaicommunity.claude.agent.sdk.config.ClaudeCliDiscovery;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -116,7 +115,7 @@ class ClaudeAgentMcpIT {
 
 		logger.info("MCP definitions: {}", mcpDefinitions.keySet());
 
-		AgentOptions optionsWithMcp = new PortableMcpAgentOptions(mcpDefinitions);
+		PortableMcpAgentOptions optionsWithMcp = new PortableMcpAgentOptions(mcpDefinitions);
 
 		AgentTaskRequest request = AgentTaskRequest
 			.builder("Say hello. Keep your response to one sentence.", this.testWorkspace)
@@ -132,50 +131,6 @@ class ClaudeAgentMcpIT {
 		String output = response.getResults().get(0).getOutput();
 		logger.info("Response text: {}", output);
 		assertThat(output).isNotBlank();
-	}
-
-	/**
-	 * Minimal AgentOptions implementation that carries portable MCP definitions for
-	 * testing. The model reads these via {@link AgentOptions#getMcpServerDefinitions()}.
-	 */
-	private static final class PortableMcpAgentOptions implements AgentOptions {
-
-		private final Map<String, McpServerDefinition> mcpDefinitions;
-
-		PortableMcpAgentOptions(Map<String, McpServerDefinition> mcpDefinitions) {
-			this.mcpDefinitions = mcpDefinitions;
-		}
-
-		@Override
-		public String getWorkingDirectory() {
-			return null;
-		}
-
-		@Override
-		public Duration getTimeout() {
-			return null;
-		}
-
-		@Override
-		public Map<String, String> getEnvironmentVariables() {
-			return Map.of();
-		}
-
-		@Override
-		public String getModel() {
-			return null;
-		}
-
-		@Override
-		public Map<String, Object> getExtras() {
-			return Map.of();
-		}
-
-		@Override
-		public Map<String, McpServerDefinition> getMcpServerDefinitions() {
-			return this.mcpDefinitions;
-		}
-
 	}
 
 	private boolean isClaudeCliAvailable() {
