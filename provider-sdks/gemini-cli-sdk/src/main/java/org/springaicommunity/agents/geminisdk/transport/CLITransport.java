@@ -30,12 +30,16 @@ import org.zeroturnaround.exec.ProcessExecutor;
 import org.zeroturnaround.exec.ProcessResult;
 import org.zeroturnaround.exec.InvalidExitValueException;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Transport layer for executing Gemini CLI commands. Handles process management and
@@ -213,6 +217,13 @@ public class CLITransport {
 			}
 		}
 
+		// Add allowed MCP server names if MCP servers are configured
+		String allowedMcpNames = options.getAllowedMcpServerNames();
+		if (allowedMcpNames != null) {
+			command.add("--allowed-mcp-server-names");
+			command.add(allowedMcpNames);
+		}
+
 		// Add prompt (must be last parameter for CLI compatibility)
 		command.add("-p");
 		command.add(prompt);
@@ -230,6 +241,51 @@ public class CLITransport {
 	 */
 	public List<Message> parseOutput(String output, CLIOptions options) {
 		return parseResponse(output);
+	}
+
+	/**
+	 * Writes MCP server configurations to {@code .gemini/settings.json} in the specified
+	 * directory. Creates the {@code .gemini/} directory if it doesn't exist.
+	 * @param workingDir the directory in which to write the settings file
+	 * @param mcpServers the MCP server configurations
+	 * @return the path to the written settings file
+	 * @throws IOException if writing fails
+	 */
+	public static Path writeMcpSettings(Path workingDir, Map<String, Object> mcpServers) throws IOException {
+		Path geminiDir = workingDir.resolve(".gemini");
+		Files.createDirectories(geminiDir);
+		Path settingsFile = geminiDir.resolve("settings.json");
+
+		ObjectMapper mapper = new ObjectMapper();
+		Map<String, Object> settings = Map.of("mcpServers", mcpServers);
+		mapper.writerWithDefaultPrettyPrinter().writeValue(settingsFile.toFile(), settings);
+
+		logger.debug("Wrote MCP settings to {}", settingsFile);
+		return settingsFile;
+	}
+
+	/**
+	 * Cleans up an MCP settings file and its parent {@code .gemini/} directory if empty.
+	 * @param settingsFile the settings file to delete
+	 */
+	public static void cleanupMcpSettings(Path settingsFile) {
+		try {
+			if (settingsFile != null && Files.exists(settingsFile)) {
+				Files.deleteIfExists(settingsFile);
+				Path geminiDir = settingsFile.getParent();
+				if (geminiDir != null && Files.isDirectory(geminiDir)) {
+					try (var entries = Files.list(geminiDir)) {
+						if (entries.findFirst().isEmpty()) {
+							Files.deleteIfExists(geminiDir);
+						}
+					}
+				}
+				logger.debug("Cleaned up MCP settings at {}", settingsFile);
+			}
+		}
+		catch (IOException e) {
+			logger.warn("Failed to clean up MCP settings file: {}", settingsFile, e);
+		}
 	}
 
 	private List<Message> parseResponse(String output) {

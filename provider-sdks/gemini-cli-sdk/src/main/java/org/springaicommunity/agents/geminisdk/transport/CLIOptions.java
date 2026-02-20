@@ -17,10 +17,11 @@
 package org.springaicommunity.agents.geminisdk.transport;
 
 import java.time.Duration;
-import java.util.List;
-import java.util.Set;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Configuration options for Gemini CLI commands in autonomous (yolo) mode.
@@ -181,7 +182,24 @@ public record CLIOptions(
 		 * <p>
 		 * Defaults to {@code null} for direct connections.
 		 */
-		String proxy) {
+		String proxy,
+
+		/**
+		 * MCP server configurations to make available during this session.
+		 *
+		 * <p>
+		 * Each entry maps a server name to its configuration (a JSON-serializable map).
+		 * The SDK writes these to {@code .gemini/settings.json} in the working directory
+		 * before CLI invocation and cleans up afterward.
+		 *
+		 * <p>
+		 * The server names are passed to {@code --allowed-mcp-server-names} to filter
+		 * which configured servers the CLI may use.
+		 *
+		 * <p>
+		 * Defaults to an empty map (no MCP servers).
+		 */
+		Map<String, Object> mcpServers) {
 
 	public CLIOptions {
 		// Apply defaults for null values
@@ -193,6 +211,9 @@ public record CLIOptions(
 		}
 		if (extensions == null) {
 			extensions = Collections.emptySet();
+		}
+		if (mcpServers == null) {
+			mcpServers = Collections.emptyMap();
 		}
 
 		// Validate timeout is reasonable
@@ -263,7 +284,7 @@ public record CLIOptions(
 	 */
 	public static CLIOptions defaultOptions() {
 		return new CLIOptions(null, true, false, Duration.ofMinutes(2), false, false, null, Collections.emptySet(),
-				Collections.emptySet(), null);
+				Collections.emptySet(), null, Collections.emptyMap());
 	}
 
 	// Convenience getters
@@ -307,6 +328,10 @@ public record CLIOptions(
 		return proxy;
 	}
 
+	public Map<String, Object> getMcpServers() {
+		return mcpServers;
+	}
+
 	public static class Builder {
 
 		private String model;
@@ -328,6 +353,8 @@ public record CLIOptions(
 		private Set<String> extensions = Collections.emptySet();
 
 		private String proxy;
+
+		private Map<String, Object> mcpServers = Collections.emptyMap();
 
 		public Builder model(String model) {
 			this.model = model;
@@ -458,11 +485,33 @@ public record CLIOptions(
 			return this;
 		}
 
-		public CLIOptions build() {
-			return new CLIOptions(model, yoloMode, allFiles, timeout, debug, sandbox, sandboxImage, includeDirectories,
-					extensions, proxy);
+		/**
+		 * Sets MCP server configurations for this session.
+		 * @param mcpServers map of server name to configuration
+		 * @return this builder instance
+		 */
+		public Builder mcpServers(Map<String, Object> mcpServers) {
+			this.mcpServers = mcpServers != null ? mcpServers : Collections.emptyMap();
+			return this;
 		}
 
+		public CLIOptions build() {
+			return new CLIOptions(model, yoloMode, allFiles, timeout, debug, sandbox, sandboxImage, includeDirectories,
+					extensions, proxy, mcpServers);
+		}
+
+	}
+
+	/**
+	 * Returns comma-separated MCP server names for use with
+	 * {@code --allowed-mcp-server-names}. Returns null if no MCP servers are configured.
+	 * @return comma-separated server names, or null
+	 */
+	public String getAllowedMcpServerNames() {
+		if (mcpServers == null || mcpServers.isEmpty()) {
+			return null;
+		}
+		return String.join(",", mcpServers.keySet());
 	}
 
 	// Convenience factory methods for common configurations
