@@ -42,6 +42,9 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
+# CLI tool config directories
+.gemini/
+
 # IDE Files
 .idea/
 *.iml
