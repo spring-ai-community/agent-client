@@ -193,7 +193,7 @@ The central architectural principle: **AgentClient resolves, AgentModel translat
 - [x] All pipeline tests pass: `./mvnw test -pl spring-ai-agent-client`
 - [x] `./mvnw spring-javaformat:apply`
 - [x] Update `ROADMAP.md` checkboxes
-- [ ] COMMIT: `Step 4.1: Add MCP catalog full-pipeline integration test`
+- [x] COMMIT: `Step 4.1: Add MCP catalog full-pipeline integration test` (9a7512a)
 
 **Files**:
 - NEW: `spring-ai-agent-client/src/test/java/org/springaicommunity/agents/client/AgentClientMcpPipelineIT.java`
@@ -222,7 +222,7 @@ The central architectural principle: **AgentClient resolves, AgentModel translat
 - [x] `./mvnw spring-javaformat:apply`
 - [x] Full build passes: `./mvnw clean test`
 - [x] Update `ROADMAP.md` checkboxes
-- [ ] COMMIT: `Step 4.2: Add Claude CLI MCP integration test`
+- [x] COMMIT: `Step 4.2: Add Claude CLI MCP integration test` (38c166b)
 
 **Files**:
 - NEW: `agent-models/spring-ai-claude-agent/src/test/java/org/springaicommunity/agents/claude/ClaudeAgentMcpIT.java`
