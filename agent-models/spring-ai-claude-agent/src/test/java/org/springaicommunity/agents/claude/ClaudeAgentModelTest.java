@@ -32,6 +32,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -400,6 +402,43 @@ class ClaudeAgentModelTest {
 
 			assertThat(blockingModel).isSameAs(streamingModel);
 			assertThat(streamingModel).isSameAs(iterableModel);
+		}
+
+	}
+
+	@Nested
+	@DisplayName("Message Listener Tests")
+	class MessageListenerTests {
+
+		@Test
+		@DisplayName("Should build with message listener")
+		void buildWithMessageListener() {
+			model = ClaudeAgentModel.builder().workingDirectory(TEST_WORKING_DIR).messageListener(parsed -> {
+			}).build();
+
+			assertThat(model).isNotNull();
+		}
+
+		@Test
+		@DisplayName("Should build without message listener (null-safe)")
+		void buildWithoutMessageListener() {
+			model = ClaudeAgentModel.builder().workingDirectory(TEST_WORKING_DIR).build();
+
+			assertThat(model).isNotNull();
+		}
+
+		@Test
+		@DisplayName("Should support fluent chaining with message listener")
+		void fluentChainingWithListener() {
+			AtomicInteger count = new AtomicInteger();
+			model = ClaudeAgentModel.builder()
+				.workingDirectory(TEST_WORKING_DIR)
+				.timeout(Duration.ofMinutes(5))
+				.messageListener(parsed -> count.incrementAndGet())
+				.defaultOptions(new ClaudeAgentOptions())
+				.build();
+
+			assertThat(model).isNotNull();
 		}
 
 	}

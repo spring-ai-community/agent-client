@@ -53,6 +53,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 /**
  * Claude Code CLI agent model implementing all three programming models:
@@ -126,6 +127,8 @@ public class ClaudeAgentModel implements AgentModel, StreamingAgentModel, Iterab
 
 	private final Executor asyncExecutor;
 
+	private final Consumer<ParsedMessage> messageListener;
+
 	private ClaudeAgentModel(Builder builder) {
 		this.workingDirectory = builder.workingDirectory;
 		this.timeout = builder.timeout;
@@ -133,6 +136,7 @@ public class ClaudeAgentModel implements AgentModel, StreamingAgentModel, Iterab
 		this.hookRegistry = builder.hookRegistry != null ? builder.hookRegistry : new HookRegistry();
 		this.defaultOptions = builder.defaultOptions != null ? builder.defaultOptions : new ClaudeAgentOptions();
 		this.asyncExecutor = builder.asyncExecutor != null ? builder.asyncExecutor : DEFAULT_EXECUTOR;
+		this.messageListener = builder.messageListener;
 	}
 
 	/**
@@ -243,6 +247,9 @@ public class ClaudeAgentModel implements AgentModel, StreamingAgentModel, Iterab
 			Iterator<ParsedMessage> response = client.receiveResponse();
 			while (response.hasNext()) {
 				ParsedMessage parsed = response.next();
+				if (messageListener != null) {
+					messageListener.accept(parsed);
+				}
 				if (parsed.isRegularMessage()) {
 					Message message = parsed.asMessage();
 					if (message instanceof AssistantMessage assistantMessage) {
@@ -322,6 +329,9 @@ public class ClaudeAgentModel implements AgentModel, StreamingAgentModel, Iterab
 				}
 				while (messageIterator.hasNext()) {
 					ParsedMessage parsed = messageIterator.next();
+					if (messageListener != null) {
+						messageListener.accept(parsed);
+					}
 					if (parsed.isRegularMessage()) {
 						AgentResponse response = convertMessageToResponse(parsed.asMessage());
 						if (response != null) {
@@ -396,6 +406,9 @@ public class ClaudeAgentModel implements AgentModel, StreamingAgentModel, Iterab
 			Iterator<ParsedMessage> response = client.receiveResponse();
 			while (response.hasNext()) {
 				ParsedMessage parsed = response.next();
+				if (messageListener != null) {
+					messageListener.accept(parsed);
+				}
 				if (parsed.isRegularMessage()) {
 					AgentResponse agentResponse = convertMessageToResponse(parsed.asMessage());
 					if (agentResponse != null) {
@@ -611,6 +624,8 @@ public class ClaudeAgentModel implements AgentModel, StreamingAgentModel, Iterab
 
 		private Executor asyncExecutor;
 
+		private Consumer<ParsedMessage> messageListener;
+
 		private Builder() {
 		}
 
@@ -682,6 +697,18 @@ public class ClaudeAgentModel implements AgentModel, StreamingAgentModel, Iterab
 		 */
 		public Builder asyncExecutor(Executor asyncExecutor) {
 			this.asyncExecutor = asyncExecutor;
+			return this;
+		}
+
+		/**
+		 * Sets a listener that receives every {@link ParsedMessage} from the Claude CLI
+		 * before any filtering. Useful for capturing tool calls, thinking blocks, and
+		 * cost data.
+		 * @param messageListener the listener (nullable)
+		 * @return this builder
+		 */
+		public Builder messageListener(Consumer<ParsedMessage> messageListener) {
+			this.messageListener = messageListener;
 			return this;
 		}
 
