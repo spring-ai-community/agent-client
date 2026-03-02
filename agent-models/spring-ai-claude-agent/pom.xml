@@ -74,5 +74,17 @@
             <artifactId>spring-test</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <!-- Agent Journal — exhaust capture (thinking, tool calls, cost, tokens) -->
+        <dependency>
+            <groupId>io.github.markpollack</groupId>
+            <artifactId>journal-core</artifactId>
+            <version>0.1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.markpollack</groupId>
+            <artifactId>claude-code-capture</artifactId>
+            <version>0.1.0-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 </project>
