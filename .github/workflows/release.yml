@@ -18,6 +18,8 @@ on:
 
 jobs:
   release:
+    permissions:
+      contents: write
     if: github.repository_owner == 'spring-ai-community'
     uses: spring-ai-community/community-workflows/.github/workflows/maven-central-release-with-cli.yml@main
     with:
