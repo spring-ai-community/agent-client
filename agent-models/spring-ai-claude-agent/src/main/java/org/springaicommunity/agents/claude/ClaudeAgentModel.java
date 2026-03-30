@@ -28,6 +28,8 @@ import org.springaicommunity.claude.agent.sdk.transport.CLIOptions;
 import org.springaicommunity.claude.agent.sdk.types.AssistantMessage;
 import org.springaicommunity.claude.agent.sdk.types.Message;
 import org.springaicommunity.claude.agent.sdk.types.ResultMessage;
+import io.github.markpollack.journal.claude.PhaseCapture;
+import io.github.markpollack.journal.claude.SessionLogParser;
 import org.springaicommunity.agents.model.AgentGeneration;
 import org.springaicommunity.agents.model.AgentGenerationMetadata;
 import org.springaicommunity.agents.model.AgentModel;
@@ -42,6 +44,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Iterator;
@@ -245,26 +248,31 @@ public class ClaudeAgentModel implements AgentModel, StreamingAgentModel, Iterab
 			client.connect(prompt);
 
 			Iterator<ParsedMessage> response = client.receiveResponse();
-			while (response.hasNext()) {
-				ParsedMessage parsed = response.next();
-				if (messageListener != null) {
-					messageListener.accept(parsed);
-				}
-				if (parsed.isRegularMessage()) {
-					Message message = parsed.asMessage();
-					if (message instanceof AssistantMessage assistantMessage) {
-						assistantMessage.getTextContent().ifPresent(fullText::append);
-					}
-				}
+
+			// Tee messages to listener if set, then let SessionLogParser consume
+			if (messageListener != null) {
+				response = new TeeingIterator(response, messageListener);
 			}
+
+			PhaseCapture capture = SessionLogParser.parse(response, "agent-run", prompt);
+			String textOutput = capture.textOutput() != null ? capture.textOutput() : "";
 
 			Duration duration = Duration.between(startTime, Instant.now());
 			AgentGenerationMetadata generationMetadata = new AgentGenerationMetadata("SUCCESS", Map.of());
-			List<AgentGeneration> generations = List.of(new AgentGeneration(fullText.toString(), generationMetadata));
+			List<AgentGeneration> generations = List.of(new AgentGeneration(textOutput, generationMetadata));
+
+			Map<String, Object> providerFields = new HashMap<>();
+			providerFields.put("phaseCapture", capture);
+			providerFields.put("inputTokens", capture.inputTokens());
+			providerFields.put("outputTokens", capture.outputTokens());
+			providerFields.put("thinkingTokens", capture.thinkingTokens());
+			providerFields.put("totalCostUsd", capture.totalCostUsd());
 
 			AgentResponseMetadata responseMetadata = AgentResponseMetadata.builder()
 				.model(getEffectiveModel())
 				.duration(duration)
+				.sessionId(capture.sessionId() != null ? capture.sessionId() : "")
+				.providerFields(providerFields)
 				.build();
 
 			return new AgentResponse(generations, responseMetadata);
@@ -721,6 +729,34 @@ public class ClaudeAgentModel implements AgentModel, StreamingAgentModel, Iterab
 				workingDirectory = Path.of(System.getProperty("user.dir"));
 			}
 			return new ClaudeAgentModel(this);
+		}
+
+	}
+
+	/**
+	 * Iterator wrapper that forwards each message to a listener before yielding it.
+	 */
+	private static class TeeingIterator implements Iterator<ParsedMessage> {
+
+		private final Iterator<ParsedMessage> delegate;
+
+		private final Consumer<ParsedMessage> listener;
+
+		TeeingIterator(Iterator<ParsedMessage> delegate, Consumer<ParsedMessage> listener) {
+			this.delegate = delegate;
+			this.listener = listener;
+		}
+
+		@Override
+		public boolean hasNext() {
+			return delegate.hasNext();
+		}
+
+		@Override
+		public ParsedMessage next() {
+			ParsedMessage msg = delegate.next();
+			listener.accept(msg);
+			return msg;
 		}
 
 	}

@@ -148,6 +148,21 @@ public record AgentClientResponse(AgentResponse agentResponse, Map<String, Objec
 	}
 
 	/**
+	 * Get the phase capture from agent-journal exhaust capture if present.
+	 * <p>
+	 * Retrieves the {@code PhaseCapture} stored by {@code ClaudeAgentModel} after parsing
+	 * the full SDK response via {@code SessionLogParser}. Contains tokens, cost, thinking
+	 * blocks, tool uses, and session metadata.
+	 * </p>
+	 * @param <T> the phase capture type
+	 * @return the phase capture, or null if exhaust capture was not enabled
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> T getPhaseCapture() {
+		return (T) this.agentResponse.getMetadata().get("phaseCapture");
+	}
+
+	/**
 	 * Check if a verdict was rendered and the aggregated judgment passed.
 	 * <p>
 	 * Convenience method that checks for verdict presence and aggregated pass status
