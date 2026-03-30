@@ -163,7 +163,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <!-- Spring AI Agents project versions -->
-        <spring-ai-agents.version>0.10.0-SNAPSHOT</spring-ai-agents.version>
+
 
         <!-- Core dependency versions -->
         <spring-ai.version>2.0.0-M2</spring-ai.version>
@@ -316,7 +316,7 @@
             <dependency>
                 <groupId>org.springaicommunity.agents</groupId>
                 <artifactId>spring-ai-agent-model</artifactId>
-                <version>${spring-ai-agents.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <!-- Claude Code SDK (from Maven Central) -->
             <dependency>
@@ -327,57 +327,57 @@
             <dependency>
                 <groupId>org.springaicommunity.agents</groupId>
                 <artifactId>gemini-cli-sdk</artifactId>
-                <version>${spring-ai-agents.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springaicommunity.agents</groupId>
                 <artifactId>swe-agent-sdk</artifactId>
-                <version>${spring-ai-agents.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springaicommunity.agents</groupId>
                 <artifactId>amp-cli-sdk</artifactId>
-                <version>${spring-ai-agents.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springaicommunity.agents</groupId>
                 <artifactId>codex-cli-sdk</artifactId>
-                <version>${spring-ai-agents.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springaicommunity.agents</groupId>
                 <artifactId>spring-ai-codex-agent</artifactId>
-                <version>${spring-ai-agents.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springaicommunity.agents</groupId>
                 <artifactId>spring-ai-claude-agent</artifactId>
-                <version>${spring-ai-agents.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springaicommunity.agents</groupId>
                 <artifactId>spring-ai-gemini</artifactId>
-                <version>${spring-ai-agents.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springaicommunity.agents</groupId>
                 <artifactId>spring-ai-swe-agent</artifactId>
-                <version>${spring-ai-agents.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springaicommunity.agents</groupId>
                 <artifactId>spring-ai-amp-agent</artifactId>
-                <version>${spring-ai-agents.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springaicommunity.agents</groupId>
                 <artifactId>spring-ai-agent-client</artifactId>
-                <version>${spring-ai-agents.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springaicommunity.agents</groupId>
                 <artifactId>spring-ai-starter-agent</artifactId>
-                <version>${spring-ai-agents.version}</version>
+                <version>${project.version}</version>
             </dependency>
 
             <!-- Testing dependencies -->
