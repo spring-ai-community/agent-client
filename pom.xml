@@ -171,9 +171,9 @@
         <slf4j.version>2.0.9</slf4j.version>
 
         <!-- External SDK versions -->
-        <claude-code-sdk.version>1.0.0-SNAPSHOT</claude-code-sdk.version>
-        <agent-sandbox.version>0.9.0-SNAPSHOT</agent-sandbox.version>
-        <agent-judge.version>0.9.0-SNAPSHOT</agent-judge.version>
+        <claude-code-sdk.version>1.0.0</claude-code-sdk.version>
+        <agent-sandbox.version>0.9.1</agent-sandbox.version>
+        <agent-judge.version>0.9.1</agent-judge.version>
 
         <!-- Agent SDK specific versions -->
         <zt-exec.version>1.12</zt-exec.version>
