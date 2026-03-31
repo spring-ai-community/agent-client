@@ -12,10 +12,7 @@
 ## 📊 SpringOne 2025 Presentation
 This project was featured in a talk at SpringOne 2025 by Mark Pollack. View the presentation: [springone-2025-presentation.html](springone-2025-presentation.html)
 
-<!-- [![Build Status](https://github.com/spring-ai-community/agent-client/workflows/CI/badge.svg)](https://github.com/spring-ai-community/agent-client/actions) -->
-<!-- [![Maven Central](https://img.shields.io/maven-central/v/org.springaicommunity.agents/spring-ai-agents-parent.svg)](https://search.maven.org/search?q=g:org.springaicommunity.agents) -->
-
-**Maven Snapshot Artifacts**: Available from [Maven Central Snapshots](https://central.sonatype.com/repository/maven-snapshots/org/springaicommunity/agents/)
+[![Maven Central](https://img.shields.io/maven-central/v/org.springaicommunity.agents/spring-ai-starter-agent-claude.svg)](https://search.maven.org/search?q=g:org.springaicommunity.agents)
 
 📖 **[Documentation](https://spring-ai-community.github.io/agent-client/)** | [Getting Started](https://spring-ai-community.github.io/agent-client/getting-started.html) | [API Reference](https://spring-ai-community.github.io/agent-client/api/agentclient.html) | [Spring AI Bench](https://github.com/spring-ai-community/spring-ai-bench)
 
@@ -67,8 +64,8 @@ jbang agents@springai hello-world-agent-ai \
 ```xml
 <dependency>
     <groupId>org.springaicommunity.agents</groupId>
-    <artifactId>spring-ai-starter-agent</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <artifactId>spring-ai-starter-agent-claude</artifactId>
+    <version>0.10.0</version>
 </dependency>
 ```
 
@@ -320,9 +317,9 @@ Spring AI Agents is Open Source software released under the [Apache 2.0 license]
 
 ## Status
 
-**Current Status**: ⚠️ **Development Phase** - APIs and structure may change
+**Current Status**: **0.10.0 Released** on Maven Central
 
-This project is actively being developed. While the core functionality is working, we recommend waiting for the `0.1.0` stable release for production use.
+This project is actively being developed. APIs may evolve between minor releases.
 
 ## Migration Path
 
