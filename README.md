@@ -1,4 +1,4 @@
-# Spring AI Agents
+# Agent Client
 
 > **Note**: This project was renamed from `spring-ai-agents` to `agent-client` in version 0.9.0.
 > Update your git remote: `git remote set-url origin git@github.com:spring-ai-community/agent-client.git`
@@ -12,13 +12,13 @@
 ## 📊 SpringOne 2025 Presentation
 This project was featured in a talk at SpringOne 2025 by Mark Pollack. View the presentation: [springone-2025-presentation.html](springone-2025-presentation.html)
 
-[![Maven Central](https://img.shields.io/maven-central/v/org.springaicommunity.agents/spring-ai-starter-agent-claude.svg)](https://search.maven.org/search?q=g:org.springaicommunity.agents)
+[![Maven Central](https://img.shields.io/maven-central/v/org.springaicommunity.agents/agent-starter-claude.svg)](https://search.maven.org/search?q=g:org.springaicommunity.agents)
 
-📖 **[Documentation](https://spring-ai-community.github.io/agent-client/)** | [Getting Started](https://spring-ai-community.github.io/agent-client/getting-started.html) | [API Reference](https://spring-ai-community.github.io/agent-client/api/agentclient.html) | [Spring AI Bench](https://github.com/spring-ai-community/spring-ai-bench)
+📖 **[Documentation](https://spring-ai-community.github.io/agent-client/)** | [Getting Started](https://spring-ai-community.github.io/agent-client/getting-started.html) | [API Reference](https://spring-ai-community.github.io/agent-client/api/agentclient.html) | [Agent Bench](https://github.com/spring-ai-community/agent-bench)
 
 > **Note**: This project is currently in development. The repository structure and APIs are subject to change.
 
-Spring AI Agents provides autonomous CLI agent integrations for the Spring AI ecosystem. This project brings Claude Code, Gemini CLI, and SWE-bench agents to Spring applications as first-class citizens with Spring Boot auto-configuration support and secure sandbox isolation.
+Agent Client provides autonomous CLI agent integrations for the Spring AI ecosystem. This project brings Claude Code, Gemini CLI, and SWE-bench agents to Spring applications as first-class citizens with Spring Boot auto-configuration support and secure sandbox isolation.
 
 ## Overview
 
@@ -34,7 +34,7 @@ Transform autonomous CLI agents into pluggable Spring components:
 
 ### Try with JBang (Zero Setup Required)
 
-The fastest way to try Spring AI Agents - no cloning, no building, just run:
+The fastest way to try Agent Client - no cloning, no building, just run:
 
 ```bash
 # One-time setup: Add the catalog
@@ -43,7 +43,7 @@ jbang catalog add --name=springai https://raw.githubusercontent.com/spring-ai-co
 # Static content example
 jbang agents@springai hello-world \
   path=greeting.txt \
-  content="Hello Spring AI Agents!"
+  content="Hello Agent Client!"
 
 # AI-powered examples (requires API keys)
 export ANTHROPIC_API_KEY="your-key-here"
@@ -66,7 +66,7 @@ jbang agents@springai hello-world-agent-ai \
 ```xml
 <dependency>
     <groupId>org.springaicommunity.agents</groupId>
-    <artifactId>spring-ai-starter-agent-claude</artifactId>
+    <artifactId>agent-starter-claude</artifactId>
     <version>0.10.0</version>
 </dependency>
 ```
@@ -99,7 +99,7 @@ An autonomous agent that increased test coverage from **0% to 71.4%** on Spring'
 
 ### Agent Advisors
 
-Spring AI Agents implements the same advisor pattern as Spring AI's ChatClient, providing powerful interception points for execution flows:
+Agent Client implements the same advisor pattern as Spring AI's ChatClient, providing powerful interception points for execution flows:
 
 ```java
 // Create an advisor to inject workspace context
@@ -176,22 +176,31 @@ spring:
 ### Mono-repo Structure
 
 ```
-spring-ai-agents/
+agent-client/
+├── advisors/                        # Agent advisors
+├── agent-client-core/               # Agent client fluent API
+├── agent-launcher/                  # Agent launcher framework
 ├── agent-models/                    # Agent implementations
-│   ├── spring-ai-agent-model/       # Core abstractions
-│   ├── spring-ai-claude-agent/       # Claude Code agent
-│   ├── spring-ai-gemini/           # Gemini CLI agent
-│   └── spring-ai-swebench-agent/   # SWE-bench agent
-├── provider-sdks/                   # CLI/SDK integrations
-│   ├── claude-agent-sdk/            # Claude Code CLI client
-│   ├── gemini-cli-sdk/             # Gemini CLI client
-│   └── swe-agent-sdk/              # SWE-bench agent SDK
+│   ├── agent-amazon-q/              # Amazon Q agent
+│   ├── agent-amp/                   # Amp agent
+│   ├── agent-claude/                # Claude Code agent
+│   ├── agent-codex/                 # Codex agent
+│   ├── agent-gemini/                # Gemini CLI agent
+│   ├── agent-judge-bridge/          # Judge Bridge agent
+│   ├── agent-model/                 # Core abstractions
+│   ├── agent-swe/                   # SWE agent
+│   └── agent-tck/                   # Technology Compatibility Kit
+├── agent-starters/                  # Auto-configuration starters
 ├── agents/                          # JBang-compatible agents
-│   ├── hello-world-agent/          # Static file creation
-│   └── hello-world-agent-ai/       # AI-powered file creation
-├── spring-ai-agent-client/          # Unified client façade
-├── spring-ai-agents-core/           # Agent launcher framework
-├── spring-ai-spring-boot-starters/  # Auto-configuration
+│   ├── code-coverage-agent/         # Test coverage improvement agent
+│   ├── hello-world-agent/           # Static file creation
+│   └── hello-world-agent-ai/        # AI-powered file creation
+├── provider-sdks/                   # CLI/SDK integrations
+│   ├── amazon-q-cli-sdk/            # Amazon Q CLI client
+│   ├── amp-cli-sdk/                 # Amp CLI client
+│   ├── codex-cli-sdk/               # Codex CLI client
+│   ├── gemini-cli-sdk/              # Gemini CLI client
+│   └── swe-agent-sdk/               # SWE-bench agent SDK
 └── samples/                         # Example applications
 ```
 
@@ -205,21 +214,28 @@ spring-ai-agents/
 
 ## Modules
 
-| Module | Description | Maven Coordinates |
-|--------|-------------|-------------------|
-| Core Abstractions | `AgentModel`, `AgentTaskRequest`, `AgentCallResult` | `org.springaicommunity.agents:spring-ai-agent-model` |
-| Claude Agent SDK | CLI client with resilience features | `org.springaicommunity.agents:claude-agent-sdk` |
-| Gemini CLI SDK | Gemini command-line interface client | `org.springaicommunity.agents:gemini-cli-sdk` |
-| SWE Agent SDK | SWE-bench agent SDK | `org.springaicommunity.agents:swe-agent-sdk` |
-| Claude Code Agent | Spring AI adapter for Claude Code | `org.springaicommunity.agents:spring-ai-claude-agent` |
-| Gemini Agent | Spring AI adapter for Gemini CLI | `org.springaicommunity.agents:spring-ai-gemini` |
-| SWE-bench Agent | Software engineering benchmarking agent | `org.springaicommunity.agents:spring-ai-swebench-agent` |
-| Agent Client | Unified fluent API | `org.springaicommunity.agents:spring-ai-agent-client` |
-| Agents Core | Agent launcher framework | `org.springaicommunity.agents:spring-ai-agents-core` |
-| Hello World Agent | Static file creation agent | `org.springaicommunity.agents:hello-world-agent` |
-| Hello World AI Agent | AI-powered file creation agent | `org.springaicommunity.agents:hello-world-agent-ai` |
-| Code Coverage Agent | Test coverage improvement agent | `org.springaicommunity.agents:code-coverage-agent` |
-| Spring Boot Starter | Auto-configuration | `org.springaicommunity.agents:spring-ai-starter-agent` |
+| Module | Description                                         | Maven Coordinates                                      |
+|--------|-----------------------------------------------------|--------------------------------------------------------|
+| Core Abstractions | `AgentModel`, `AgentTaskRequest`, `AgentCallResult` | `org.springaicommunity.agents:agent-model`             |
+| Amazon Q CLI SDK | Amazon Q command-line interface client              | `org.springaicommunity.agents:amazon-q-cli-sdk`        |
+| Amp CLI SDK | Amp command-line interface client                   | `org.springaicommunity.agents:amp-cli-sdk`             |
+| Codex CLI SDK | Codex command-line interface client                 | `org.springaicommunity.agents:codex-cli-sdk`           |
+| Gemini CLI SDK | Gemini command-line interface client                | `org.springaicommunity.agents:gemini-cli-sdk`          |
+| SWE Agent SDK | SWE-bench agent SDK                                 | `org.springaicommunity.agents:swe-agent-sdk`           |
+| Amazon Q Agent | Adapter for Amazon Q                                | `org.springaicommunity.agents:agent-amazon-q`          |
+| Amp Agent | Adapter for Amp                                     | `org.springaicommunity.agents:agent-amp`               |
+| Claude Code Agent | Adapter for Claude Code                             | `org.springaicommunity.agents:agent-claude`            |
+| Codex Agent | Adapter for Codex                                   | `org.springaicommunity.agents:agent-codex`             |
+| Gemini Agent | Adapter for Gemini CLI                              | `org.springaicommunity.agents:agent-gemini`            |
+| Judge Bridge Agent | Adapter for Judge Bridge                            | `org.springaicommunity.agents:agent-judge-bridge`      |
+| SWE Agent | Software engineering benchmarking agent             | `org.springaicommunity.agents:agent-swe`               |
+| Agent TCK | Technology Compatibility Kit for Agents             | `org.springaicommunity.agents:agent-tck`               |
+| Agent Client | Unified fluent API                                  | `org.springaicommunity.agents:agent-client-core`       |
+| Agents Core | Agent launcher framework                            | `org.springaicommunity.agents:agent-launcher`          |
+| Hello World Agent | Static file creation agent                          | `org.springaicommunity.agents:hello-world-agent`       |
+| Hello World AI Agent | AI-powered file creation agent                      | `org.springaicommunity.agents:hello-world-agent-ai`    |
+| Code Coverage Agent | Test coverage improvement agent                     | `org.springaicommunity.agents:code-coverage-agent`     |
+| Agent Starters | Auto-configuration for providers                    | `org.springaicommunity.agents:agent-starter-*`         |
 
 ## Features
 
@@ -276,13 +292,13 @@ See the [`samples/`](samples/) directory for complete examples:
 ./mvnw clean verify
 
 # Run specific integration test (Failsafe - proper way)
-./mvnw failsafe:integration-test -pl agent-models/spring-ai-claude-agent -Dit.test=ClaudeCodeLocalSandboxIT
+./mvnw failsafe:integration-test -pl agent-models/agent-claude -Dit.test=ClaudeCodeLocalSandboxIT
 
 # Run Docker infrastructure tests (Failsafe - proper way)
-./mvnw failsafe:integration-test -pl agent-models/spring-ai-claude-agent -Dit.test=ClaudeDockerInfraIT
+./mvnw failsafe:integration-test -pl agent-models/agent-claude -Dit.test=ClaudeDockerInfraIT
 
 # Alternative: Surefire can run IT tests when explicitly specified
-./mvnw test -pl agent-models/spring-ai-claude-agent -Dtest=ClaudeDockerInfraIT
+./mvnw test -pl agent-models/agent-claude -Dtest=ClaudeDockerInfraIT
 ```
 
 #### Authentication for Tests
@@ -315,7 +331,7 @@ This project follows the [Spring AI Community Guidelines](https://github.com/spr
 
 ## License
 
-Spring AI Agents is Open Source software released under the [Apache 2.0 license](LICENSE).
+Agent Client is Open Source software released under the [Apache 2.0 license](LICENSE).
 
 ## Status
 
