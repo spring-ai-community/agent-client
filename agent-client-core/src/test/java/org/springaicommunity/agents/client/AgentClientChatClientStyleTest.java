@@ -456,4 +456,100 @@ class AgentClientChatClientStyleTest {
 		// vs ChatClient: prompt → call → content (chat semantics)
 	}
 
+	// =====================================================
+	// Options Passing and Merging Tests
+	// =====================================================
+
+	@Test
+	void testOptions_OnRequestSpec() {
+		// Test: client.goal("task").options(options).run() - options passed via fluent
+		// API
+		DefaultAgentOptions requestOptions = DefaultAgentOptions.builder()
+			.timeout(Duration.ofMinutes(3))
+			.model("request-model")
+			.build();
+
+		AgentClient client = AgentClient.create(this.mockModel);
+
+		AgentClientResponse response = client.goal("Test request options")
+			.options(requestOptions)
+			.workingDirectory(this.testWorkspace)
+			.run();
+
+		assertThat(response).isNotNull();
+		assertThat(this.mockModel.lastRequest.options()).isNotNull();
+		assertThat(this.mockModel.lastRequest.options().getModel()).isEqualTo("request-model");
+		assertThat(this.mockModel.lastRequest.options().getTimeout()).isEqualTo(Duration.ofMinutes(3));
+	}
+
+	@Test
+	void testOptions_MergeWithBuilderDefaults() {
+		// Test: Request options should override builder default options
+		DefaultAgentOptions builderDefaults = DefaultAgentOptions.builder()
+			.timeout(Duration.ofMinutes(10))
+			.model("default-model")
+			.workingDirectory(this.testWorkspace.toString())
+			.build();
+
+		DefaultAgentOptions requestOptions = DefaultAgentOptions.builder()
+			.model("request-override-model") // Only override model
+			.build();
+
+		AgentClient client = AgentClient.builder(this.mockModel).defaultOptions(builderDefaults).build();
+
+		AgentClientResponse response = client.goal("Test options merge").options(requestOptions).run();
+
+		assertThat(response).isNotNull();
+		assertThat(this.mockModel.lastRequest.options()).isNotNull();
+		// Request model should override default
+		assertThat(this.mockModel.lastRequest.options().getModel()).isEqualTo("request-override-model");
+	}
+
+	@Test
+	void testOptions_PriorityChain() {
+		// Test: requestOptions > goalOptions > defaultOptions
+		DefaultAgentOptions defaultOpts = DefaultAgentOptions.builder()
+			.model("default-model")
+			.timeout(Duration.ofMinutes(10))
+			.build();
+
+		DefaultAgentOptions goalOpts = DefaultAgentOptions.builder()
+			.model("goal-model")
+			.timeout(Duration.ofMinutes(5))
+			.build();
+
+		DefaultAgentOptions requestOpts = DefaultAgentOptions.builder().model("request-model").build();
+
+		AgentClient client = AgentClient.builder(this.mockModel).defaultOptions(defaultOpts).build();
+
+		// Goal has options, request has options - request should take priority
+		Goal goal = new Goal("Test priority chain", this.testWorkspace, goalOpts);
+		AgentClientResponse response = client.goal(goal).options(requestOpts).run();
+
+		assertThat(response).isNotNull();
+		// Request options should have highest priority
+		assertThat(this.mockModel.lastRequest.options().getModel()).isEqualTo("request-model");
+	}
+
+	@Test
+	void testOptions_FromGoal() {
+		// Test: Options passed via Goal object
+		DefaultAgentOptions goalOptions = DefaultAgentOptions.builder()
+			.model("goal-model")
+			.timeout(Duration.ofMinutes(7))
+			.workingDirectory(this.testWorkspace.toString())
+			.build();
+
+		Goal goal = new Goal("Test goal options", null, goalOptions);
+
+		AgentClient client = AgentClient.create(this.mockModel);
+
+		AgentClientResponse response = client.goal(goal).run();
+
+		assertThat(response).isNotNull();
+		assertThat(this.mockModel.lastRequest.options()).isNotNull();
+		assertThat(this.mockModel.lastRequest.options().getModel()).isEqualTo("goal-model");
+		assertThat(this.mockModel.lastRequest.options().getTimeout()).isEqualTo(Duration.ofMinutes(7));
+	}
+
 }

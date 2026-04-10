@@ -18,6 +18,8 @@ package org.springaicommunity.agents.amazonq;
 
 import org.springaicommunity.agents.model.AgentOptions;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,24 +33,34 @@ import java.util.Map;
  */
 public class AmazonQAgentOptions implements AgentOptions {
 
+	@JsonProperty("model")
 	private String model = "amazon-q-developer";
 
+	@JsonProperty("timeout")
 	private Duration timeout = Duration.ofMinutes(10);
 
+	@JsonProperty("trustAllTools")
 	private boolean trustAllTools = true;
 
+	@JsonProperty("trustTools")
 	private List<String> trustTools = new ArrayList<>();
 
+	@JsonProperty("agent")
 	private String agent;
 
+	@JsonProperty("verbose")
 	private boolean verbose = false;
 
+	@JsonProperty("executablePath")
 	private String executablePath;
 
+	@JsonProperty("workingDirectory")
 	private String workingDirectory;
 
+	@JsonProperty("environmentVariables")
 	private Map<String, String> environmentVariables = Map.of();
 
+	@JsonProperty("extras")
 	private Map<String, Object> extras = Map.of();
 
 	private AmazonQAgentOptions() {

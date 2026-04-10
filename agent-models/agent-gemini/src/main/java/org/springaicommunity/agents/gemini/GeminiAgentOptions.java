@@ -18,6 +18,8 @@ package org.springaicommunity.agents.gemini;
 
 import org.springaicommunity.agents.model.AgentOptions;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.time.Duration;
 import java.util.Map;
 
@@ -32,41 +34,49 @@ public class GeminiAgentOptions implements AgentOptions {
 	/**
 	 * The model name to use (e.g., "gemini-2.5-flash", "gemini-pro").
 	 */
+	@JsonProperty("model")
 	private String model = "gemini-2.5-flash";
 
 	/**
 	 * Timeout for agent execution.
 	 */
+	@JsonProperty("timeout")
 	private Duration timeout = Duration.ofMinutes(10);
 
 	/**
 	 * Working directory for agent execution. If null, uses system temp directory.
 	 */
+	@JsonProperty("workingDirectory")
 	private String workingDirectory;
 
 	/**
 	 * Environment variables to set for the agent process.
 	 */
+	@JsonProperty("environmentVariables")
 	private Map<String, String> environmentVariables = Map.of();
 
 	/**
 	 * Extra provider-specific options for forward compatibility.
 	 */
+	@JsonProperty("extras")
 	private Map<String, Object> extras = Map.of();
 
 	/**
 	 * Path to the Gemini CLI executable. If null, uses default discovery.
 	 */
+	@JsonProperty("executablePath")
 	private String executablePath;
 
 	/**
 	 * Temperature for controlling response randomness (0.0-1.0).
 	 */
+	@JsonProperty("temperature")
 	private Double temperature;
 
 	/**
 	 * Maximum number of tokens to generate in the response.
 	 */
+	@JsonProperty("maxTokens")
 	private Integer maxTokens;
 
 	/**
@@ -74,6 +84,7 @@ public class GeminiAgentOptions implements AgentOptions {
 	 * autonomous operation. When true, the agent will execute all operations without any
 	 * safety prompts including file modifications and command execution.
 	 */
+	@JsonProperty("yolo")
 	private boolean yolo = true;
 
 	public GeminiAgentOptions() {

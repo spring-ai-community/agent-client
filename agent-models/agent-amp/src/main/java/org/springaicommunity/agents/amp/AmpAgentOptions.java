@@ -18,6 +18,8 @@ package org.springaicommunity.agents.amp;
 
 import org.springaicommunity.agents.model.AgentOptions;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.time.Duration;
 import java.util.Map;
 
@@ -32,37 +34,44 @@ public class AmpAgentOptions implements AgentOptions {
 	/**
 	 * The model name to use (if supported by Amp CLI).
 	 */
+	@JsonProperty("model")
 	private String model;
 
 	/**
 	 * Timeout for agent execution.
 	 */
+	@JsonProperty("timeout")
 	private Duration timeout = Duration.ofMinutes(10);
 
 	/**
 	 * Working directory for agent execution. If null, uses system temp directory.
 	 */
+	@JsonProperty("workingDirectory")
 	private String workingDirectory;
 
 	/**
 	 * Environment variables to set for the agent process.
 	 */
+	@JsonProperty("environmentVariables")
 	private Map<String, String> environmentVariables = Map.of();
 
 	/**
 	 * Extra provider-specific options for forward compatibility.
 	 */
+	@JsonProperty("extras")
 	private Map<String, Object> extras = Map.of();
 
 	/**
 	 * Path to the Amp CLI executable. If null, uses default discovery.
 	 */
+	@JsonProperty("executablePath")
 	private String executablePath;
 
 	/**
 	 * Dangerously allow all - bypasses ALL permission checks. When true, the agent will
 	 * execute all operations without any safety prompts. USE WITH CAUTION.
 	 */
+	@JsonProperty("dangerouslyAllowAll")
 	private boolean dangerouslyAllowAll = true;
 
 	public AmpAgentOptions() {

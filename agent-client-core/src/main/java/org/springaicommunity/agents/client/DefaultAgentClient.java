@@ -31,8 +31,7 @@ import org.springaicommunity.agents.client.advisor.DefaultAgentCallAdvisorChain;
 import org.springaicommunity.agents.client.advisor.api.AgentCallAdvisor;
 import org.springaicommunity.agents.model.AgentModel;
 import org.springaicommunity.agents.model.AgentOptions;
-import org.springaicommunity.agents.model.AgentResponse;
-import org.springaicommunity.agents.model.AgentTaskRequest;
+import org.springaicommunity.agents.model.AgentOptionsUtils;
 import org.springaicommunity.agents.model.mcp.McpServerCatalog;
 import org.springaicommunity.agents.model.mcp.McpServerDefinition;
 
@@ -87,7 +86,8 @@ public class DefaultAgentClient implements AgentClient {
 	 * Create a new DefaultAgentClient with the given agent model, default options,
 	 * advisors, and MCP catalog.
 	 * @param agentModel the underlying agent model
-	 * @param defaultOptions default options for all requests
+	 * @param defaultOptions default options for all requests (may be null, defaults to
+	 * DefaultAgentOptions)
 	 * @param defaultAdvisors default advisors for all requests
 	 * @param mcpServerCatalog the MCP server catalog, may be null
 	 * @param defaultMcpServerNames default MCP server names for all requests
@@ -149,9 +149,12 @@ public class DefaultAgentClient implements AgentClient {
 
 		private List<String> mcpServerNames = new ArrayList<>();
 
+		private AgentOptions options;
+
 		public DefaultAgentClientRequestSpec(Goal goal) {
 			this.goal = goal; // Can be null for goal() method
 			this.workingDirectory = goal != null ? goal.getWorkingDirectory() : null;
+			this.options = goal != null ? goal.getOptions() : null;
 		}
 
 		@Override
@@ -195,6 +198,12 @@ public class DefaultAgentClient implements AgentClient {
 		}
 
 		@Override
+		public AgentClientRequestSpec options(AgentOptions options) {
+			this.options = options;
+			return this;
+		}
+
+		@Override
 		public AgentClientResponse run() {
 			// Ensure we have a goal before proceeding
 			if (this.goal == null) {
@@ -205,9 +214,8 @@ public class DefaultAgentClient implements AgentClient {
 			// Determine effective working directory
 			Path effectiveWorkingDirectory = determineWorkingDirectory();
 
-			// Merge options
-			AgentOptions effectiveOptions = mergeOptions(this.goal.getOptions(),
-					DefaultAgentClient.this.defaultOptions);
+			// Determine effective options with priority: request > goal > default
+			AgentOptions effectiveOptions = determineEffectiveOptions();
 
 			// Resolve MCP server names to definitions via the catalog
 			effectiveOptions = resolveMcpServers(effectiveOptions);
@@ -248,21 +256,22 @@ public class DefaultAgentClient implements AgentClient {
 			}
 		}
 
-		private AgentOptions mergeOptions(AgentOptions goalOptions, AgentOptions defaultOptions) {
-			// If goal has no options, use defaults
-			if (goalOptions == null) {
-				return defaultOptions;
+		private AgentOptions determineEffectiveOptions() {
+			if (this.options != null) {
+				// Request-level options take highest priority
+				return AgentOptionsUtils.merge(this.options, DefaultAgentClient.this.defaultOptions,
+						this.options.getClass());
 			}
-
-			// If no defaults, use goal options
-			if (defaultOptions == null) {
-				return goalOptions;
+			else if (this.goal.getOptions() != null) {
+				AgentOptions goalOptions = this.goal.getOptions();
+				// Goal options take second priority
+				return AgentOptionsUtils.merge(goalOptions, DefaultAgentClient.this.defaultOptions,
+						goalOptions.getClass());
 			}
-
-			// Both exist - goal options take precedence
-			// For now, just return goal options since merging complex
-			// TODO: Implement proper options merging if needed
-			return goalOptions;
+			else {
+				// Fall back to default options
+				return DefaultAgentClient.this.defaultOptions;
+			}
 		}
 
 		private AgentOptions resolveMcpServers(AgentOptions options) {
@@ -285,7 +294,9 @@ public class DefaultAgentClient implements AgentClient {
 			Map<String, McpServerDefinition> resolved = DefaultAgentClient.this.mcpServerCatalog.resolve(allNames);
 
 			// Build new options carrying the resolved definitions
-			return DefaultAgentOptions.builder().from(options).mcpServerDefinitions(resolved).build();
+			// Use AgentOptionsUtils.merge() to preserve the original options type
+			DefaultAgentOptions mcpOptions = DefaultAgentOptions.builder().mcpServerDefinitions(resolved).build();
+			return AgentOptionsUtils.merge(mcpOptions, options, options.getClass());
 		}
 
 	}
