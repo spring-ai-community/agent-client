@@ -75,8 +75,8 @@ public class CodexAgentModel implements AgentModel {
 		// Merge options
 		CodexAgentOptions options = mergeOptions(request);
 
-		// Convert to ExecuteOptions
-		ExecuteOptions executeOptions = toExecuteOptions(options);
+		// Convert to ExecuteOptions (includes working directory from request)
+		ExecuteOptions executeOptions = toExecuteOptions(options, request);
 
 		// Execute via SDK
 		ExecuteResult result = codexClient.execute(goal, executeOptions);
@@ -137,7 +137,7 @@ public class CodexAgentModel implements AgentModel {
 		return builder.build();
 	}
 
-	private ExecuteOptions toExecuteOptions(CodexAgentOptions options) {
+	private ExecuteOptions toExecuteOptions(CodexAgentOptions options, AgentTaskRequest request) {
 		ExecuteOptions.Builder builder = ExecuteOptions.builder()
 			.model(options.getModel())
 			.timeout(options.getTimeout())
@@ -152,6 +152,11 @@ public class CodexAgentModel implements AgentModel {
 
 		if (options.getOutputSchema() != null) {
 			builder.outputSchema(options.getOutputSchema());
+		}
+
+		// Propagate working directory from request
+		if (request.workingDirectory() != null) {
+			builder.workingDirectory(request.workingDirectory());
 		}
 
 		return builder.build();

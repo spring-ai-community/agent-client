@@ -189,30 +189,26 @@ public class CLITransport {
 	private List<String> buildCommand(String prompt, ExecuteOptions options, String sessionId) {
 		List<String> command = new ArrayList<>();
 
-		// Base command
+		// Base command + exec subcommand
 		command.add(codexCliPath);
+		command.add("exec");
 
-		// Global options before exec subcommand
+		// Model is an exec-specific option (not a global flag)
 		if (options.getModel() != null && !options.getModel().isEmpty()) {
 			command.add("--model");
 			command.add(options.getModel());
 		}
 
-		// exec subcommand
-		command.add("exec");
-
-		// exec-specific options
+		// Execution mode: --full-auto or explicit --sandbox
 		if (options.isFullAuto()) {
 			command.add("--full-auto");
 		}
 		else {
-			// Explicit sandbox mode (exec subcommand does not support
-			// --ask-for-approval)
 			command.add("--sandbox");
 			command.add(options.getSandboxMode().getValue());
 		}
 
-		// Working directory via -C flag (if different from current)
+		// Working directory via -C flag
 		if (options.getWorkingDirectory() != null) {
 			command.add("-C");
 			command.add(options.getWorkingDirectory().toString());
