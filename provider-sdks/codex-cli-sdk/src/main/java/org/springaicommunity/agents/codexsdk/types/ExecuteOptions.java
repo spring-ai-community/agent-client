@@ -45,6 +45,8 @@ public class ExecuteOptions {
 
 	private final Path outputSchema;
 
+	private final boolean dangerouslyBypassSandbox;
+
 	private ExecuteOptions(Builder builder) {
 		this.model = builder.model;
 		this.timeout = builder.timeout;
@@ -55,6 +57,7 @@ public class ExecuteOptions {
 		this.skipGitCheck = builder.skipGitCheck;
 		this.jsonOutput = builder.jsonOutput;
 		this.outputSchema = builder.outputSchema;
+		this.dangerouslyBypassSandbox = builder.dangerouslyBypassSandbox;
 	}
 
 	public static Builder builder() {
@@ -101,6 +104,10 @@ public class ExecuteOptions {
 		return outputSchema;
 	}
 
+	public boolean isDangerouslyBypassSandbox() {
+		return dangerouslyBypassSandbox;
+	}
+
 	public static class Builder {
 
 		private String model = "gpt-5-codex";
@@ -120,6 +127,8 @@ public class ExecuteOptions {
 		private boolean jsonOutput = false;
 
 		private Path outputSchema;
+
+		private boolean dangerouslyBypassSandbox = false;
 
 		public Builder model(String model) {
 			this.model = model;
@@ -168,6 +177,11 @@ public class ExecuteOptions {
 
 		public Builder outputSchema(Path outputSchema) {
 			this.outputSchema = outputSchema;
+			return this;
+		}
+
+		public Builder dangerouslyBypassSandbox(boolean dangerouslyBypassSandbox) {
+			this.dangerouslyBypassSandbox = dangerouslyBypassSandbox;
 			return this;
 		}
 

@@ -44,6 +44,8 @@ public class CodexAgentOptions implements AgentOptions {
 
 	private boolean skipGitCheck = false;
 
+	private boolean dangerouslyBypassSandbox = false;
+
 	private String executablePath;
 
 	private Path outputSchema;
@@ -84,6 +86,10 @@ public class CodexAgentOptions implements AgentOptions {
 
 	public boolean isSkipGitCheck() {
 		return skipGitCheck;
+	}
+
+	public boolean isDangerouslyBypassSandbox() {
+		return dangerouslyBypassSandbox;
 	}
 
 	public String getExecutablePath() {
@@ -147,6 +153,11 @@ public class CodexAgentOptions implements AgentOptions {
 
 		public Builder skipGitCheck(boolean skipGitCheck) {
 			options.skipGitCheck = skipGitCheck;
+			return this;
+		}
+
+		public Builder dangerouslyBypassSandbox(boolean dangerouslyBypassSandbox) {
+			options.dangerouslyBypassSandbox = dangerouslyBypassSandbox;
 			return this;
 		}
 

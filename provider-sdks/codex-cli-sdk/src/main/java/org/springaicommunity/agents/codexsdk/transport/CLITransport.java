@@ -199,8 +199,11 @@ public class CLITransport {
 			command.add(options.getModel());
 		}
 
-		// Execution mode: --full-auto or explicit --sandbox
-		if (options.isFullAuto()) {
+		// Execution mode
+		if (options.isDangerouslyBypassSandbox()) {
+			command.add("--dangerously-bypass-approvals-and-sandbox");
+		}
+		else if (options.isFullAuto()) {
 			command.add("--full-auto");
 		}
 		else {

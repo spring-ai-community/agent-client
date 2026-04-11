@@ -24,6 +24,7 @@ import org.springaicommunity.agents.codexsdk.types.ExecuteResult;
 import org.springaicommunity.agents.model.*;
 import org.springaicommunity.sandbox.Sandbox;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
@@ -78,11 +79,17 @@ public class CodexAgentModel implements AgentModel {
 		// Convert to ExecuteOptions (includes working directory from request)
 		ExecuteOptions executeOptions = toExecuteOptions(options, request);
 
-		// Execute via SDK
-		ExecuteResult result = codexClient.execute(goal, executeOptions);
+		try {
+			// Execute via SDK
+			ExecuteResult result = codexClient.execute(goal, executeOptions);
 
-		// Convert to AgentResponse
-		return toAgentResponse(result);
+			// Convert to AgentResponse
+			return toAgentResponse(result);
+		}
+		catch (Exception e) {
+			logger.warn("Codex agent execution failed: {}", e.getMessage());
+			return toErrorResponse(e);
+		}
 	}
 
 	@Override
@@ -103,6 +110,7 @@ public class CodexAgentModel implements AgentModel {
 			.timeout(defaultOptions.getTimeout())
 			.fullAuto(defaultOptions.isFullAuto())
 			.skipGitCheck(defaultOptions.isSkipGitCheck())
+			.dangerouslyBypassSandbox(defaultOptions.isDangerouslyBypassSandbox())
 			.executablePath(defaultOptions.getExecutablePath());
 
 		if (defaultOptions.getSandboxMode() != null) {
@@ -142,9 +150,10 @@ public class CodexAgentModel implements AgentModel {
 			.model(options.getModel())
 			.timeout(options.getTimeout())
 			.fullAuto(options.isFullAuto())
-			.skipGitCheck(options.isSkipGitCheck());
+			.skipGitCheck(options.isSkipGitCheck())
+			.dangerouslyBypassSandbox(options.isDangerouslyBypassSandbox());
 
-		if (!options.isFullAuto()) {
+		if (!options.isFullAuto() && !options.isDangerouslyBypassSandbox()) {
 			if (options.getSandboxMode() != null) {
 				builder.sandboxMode(options.getSandboxMode());
 			}
@@ -160,6 +169,17 @@ public class CodexAgentModel implements AgentModel {
 		}
 
 		return builder.build();
+	}
+
+	private AgentResponse toErrorResponse(Exception e) {
+		AgentGeneration generation = new AgentGeneration(e.getMessage(),
+				new AgentGenerationMetadata("ERROR", Map.of("error", e.getMessage())));
+		AgentResponseMetadata metadata = AgentResponseMetadata.builder()
+			.model("codex-default")
+			.duration(Duration.ZERO)
+			.providerFields(Map.of("error", e.getMessage()))
+			.build();
+		return new AgentResponse(List.of(generation), metadata);
 	}
 
 	private AgentResponse toAgentResponse(ExecuteResult result) {

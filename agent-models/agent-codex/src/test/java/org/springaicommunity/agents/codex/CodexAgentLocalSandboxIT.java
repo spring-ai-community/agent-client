@@ -53,7 +53,7 @@ class CodexAgentLocalSandboxIT extends AbstractAgentModelTCK {
 
 			// Create Codex client with default options
 			ExecuteOptions executeOptions = ExecuteOptions.builder()
-				.fullAuto(true)
+				.dangerouslyBypassSandbox(true)
 				.timeout(Duration.ofMinutes(3))
 				.skipGitCheck(false)
 				.build();
@@ -64,7 +64,7 @@ class CodexAgentLocalSandboxIT extends AbstractAgentModelTCK {
 			CodexAgentOptions options = CodexAgentOptions.builder()
 				.model("gpt-5-codex")
 				.timeout(Duration.ofMinutes(3))
-				.fullAuto(true)
+				.dangerouslyBypassSandbox(true)
 				.skipGitCheck(false)
 				.build();
 
@@ -84,7 +84,7 @@ class CodexAgentLocalSandboxIT extends AbstractAgentModelTCK {
 		return CodexAgentOptions.builder()
 			.model("gpt-5-codex")
 			.timeout(Duration.ofSeconds(10)) // Short timeout for timeout testing
-			.fullAuto(true)
+			.dangerouslyBypassSandbox(true)
 			.skipGitCheck(false)
 			.build();
 	}
