@@ -16,6 +16,7 @@
 
 package org.springaicommunity.agents.codex;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springaicommunity.agents.codexsdk.CodexClient;
@@ -24,6 +25,9 @@ import org.springaicommunity.agents.codexsdk.types.ExecuteResult;
 import org.springaicommunity.agents.model.*;
 import org.springaicommunity.sandbox.Sandbox;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +47,8 @@ import java.util.Map;
 public class CodexAgentModel implements AgentModel {
 
 	private static final Logger logger = LoggerFactory.getLogger(CodexAgentModel.class);
+
+	private static final ObjectMapper MAPPER = new ObjectMapper();
 
 	private final CodexClient codexClient;
 
@@ -76,10 +82,26 @@ public class CodexAgentModel implements AgentModel {
 		// Merge options
 		CodexAgentOptions options = mergeOptions(request);
 
-		// Convert to ExecuteOptions (includes working directory from request)
-		ExecuteOptions executeOptions = toExecuteOptions(options, request);
-
+		// Bridge portable jsonSchema → temp file for Codex --output-schema
+		Path jsonSchemaTempFile = null;
 		try {
+			if (options.getOutputSchema() == null && request.options() != null
+					&& request.options().getJsonSchema() != null) {
+				jsonSchemaTempFile = writeJsonSchemaToTempFile(request.options().getJsonSchema());
+				options = CodexAgentOptions.builder()
+					.model(options.getModel())
+					.timeout(options.getTimeout())
+					.fullAuto(options.isFullAuto())
+					.skipGitCheck(options.isSkipGitCheck())
+					.dangerouslyBypassSandbox(options.isDangerouslyBypassSandbox())
+					.executablePath(options.getExecutablePath())
+					.outputSchema(jsonSchemaTempFile)
+					.build();
+			}
+
+			// Convert to ExecuteOptions (includes working directory from request)
+			ExecuteOptions executeOptions = toExecuteOptions(options, request);
+
 			// Execute via SDK
 			ExecuteResult result = codexClient.execute(goal, executeOptions);
 
@@ -90,6 +112,23 @@ public class CodexAgentModel implements AgentModel {
 			logger.warn("Codex agent execution failed: {}", e.getMessage());
 			return toErrorResponse(e);
 		}
+		finally {
+			if (jsonSchemaTempFile != null) {
+				try {
+					Files.deleteIfExists(jsonSchemaTempFile);
+				}
+				catch (IOException ex) {
+					logger.warn("Failed to delete temp schema file: {}", jsonSchemaTempFile, ex);
+				}
+			}
+		}
+	}
+
+	private Path writeJsonSchemaToTempFile(Map<String, Object> jsonSchema) throws IOException {
+		Path tempFile = Files.createTempFile("codex-schema-", ".json");
+		MAPPER.writerWithDefaultPrettyPrinter().writeValue(tempFile.toFile(), jsonSchema);
+		logger.debug("Wrote portable jsonSchema to temp file: {}", tempFile);
+		return tempFile;
 	}
 
 	@Override

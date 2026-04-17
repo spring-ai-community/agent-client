@@ -149,6 +149,8 @@ public class DefaultAgentClient implements AgentClient {
 
 		private List<String> mcpServerNames = new ArrayList<>();
 
+		private Map<String, Object> jsonSchema;
+
 		public DefaultAgentClientRequestSpec(Goal goal) {
 			this.goal = goal; // Can be null for goal() method
 			this.workingDirectory = goal != null ? goal.getWorkingDirectory() : null;
@@ -195,6 +197,12 @@ public class DefaultAgentClient implements AgentClient {
 		}
 
 		@Override
+		public AgentClientRequestSpec jsonSchema(Map<String, Object> jsonSchema) {
+			this.jsonSchema = jsonSchema;
+			return this;
+		}
+
+		@Override
 		public AgentClientResponse run() {
 			// Ensure we have a goal before proceeding
 			if (this.goal == null) {
@@ -211,6 +219,14 @@ public class DefaultAgentClient implements AgentClient {
 
 			// Resolve MCP server names to definitions via the catalog
 			effectiveOptions = resolveMcpServers(effectiveOptions);
+
+			// Inject per-request jsonSchema if set (only override when explicitly set)
+			if (this.jsonSchema != null) {
+				effectiveOptions = DefaultAgentOptions.builder()
+					.from(effectiveOptions)
+					.jsonSchema(this.jsonSchema)
+					.build();
+			}
 
 			// Create client-layer request
 			AgentClientRequest request = new AgentClientRequest(this.goal, effectiveWorkingDirectory, effectiveOptions,

@@ -224,6 +224,12 @@ public class CLITransport {
 			command.add(allowedMcpNames);
 		}
 
+		// Add output format if specified (e.g., "json" for structured output)
+		if (options.getOutputFormat() != null && !options.getOutputFormat().trim().isEmpty()) {
+			command.add("-o");
+			command.add(options.getOutputFormat());
+		}
+
 		// Add prompt (must be last parameter for CLI compatibility)
 		command.add("-p");
 		command.add(prompt);
@@ -240,6 +246,22 @@ public class CLITransport {
 	 * @return list of parsed messages
 	 */
 	public List<Message> parseOutput(String output, CLIOptions options) {
+		// When -o json is used, Gemini CLI wraps the response in a JSON envelope
+		// with "response", "session_id", and "stats" fields. Extract just the response.
+		if ("json".equals(options.getOutputFormat()) && output != null && output.trim().startsWith("{")) {
+			try {
+				ObjectMapper mapper = new ObjectMapper();
+				@SuppressWarnings("unchecked")
+				Map<String, Object> envelope = mapper.readValue(output.trim(), Map.class);
+				Object response = envelope.get("response");
+				if (response != null) {
+					return parseResponse(response.toString());
+				}
+			}
+			catch (Exception e) {
+				logger.debug("Failed to parse JSON envelope, falling back to raw parsing: {}", e.getMessage());
+			}
+		}
 		return parseResponse(output);
 	}
 

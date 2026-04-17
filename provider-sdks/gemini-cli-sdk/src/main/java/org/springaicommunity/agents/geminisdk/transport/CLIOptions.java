@@ -199,7 +199,19 @@ public record CLIOptions(
 		 * <p>
 		 * Defaults to an empty map (no MCP servers).
 		 */
-		Map<String, Object> mcpServers) {
+		Map<String, Object> mcpServers,
+
+		/**
+		 * Output format mode for the CLI response.
+		 *
+		 * <p>
+		 * Corresponds to the {@code -o, --output-format} CLI flag. When set to
+		 * {@code "json"}, the CLI constrains output to valid JSON.
+		 *
+		 * <p>
+		 * Defaults to {@code null} (no output format constraint).
+		 */
+		String outputFormat) {
 
 	public CLIOptions {
 		// Apply defaults for null values
@@ -284,7 +296,7 @@ public record CLIOptions(
 	 */
 	public static CLIOptions defaultOptions() {
 		return new CLIOptions(null, true, false, Duration.ofMinutes(2), false, false, null, Collections.emptySet(),
-				Collections.emptySet(), null, Collections.emptyMap());
+				Collections.emptySet(), null, Collections.emptyMap(), null);
 	}
 
 	// Convenience getters
@@ -332,6 +344,10 @@ public record CLIOptions(
 		return mcpServers;
 	}
 
+	public String getOutputFormat() {
+		return outputFormat;
+	}
+
 	public static class Builder {
 
 		private String model;
@@ -355,6 +371,8 @@ public record CLIOptions(
 		private String proxy;
 
 		private Map<String, Object> mcpServers = Collections.emptyMap();
+
+		private String outputFormat;
 
 		public Builder model(String model) {
 			this.model = model;
@@ -495,9 +513,14 @@ public record CLIOptions(
 			return this;
 		}
 
+		public Builder outputFormat(String outputFormat) {
+			this.outputFormat = outputFormat;
+			return this;
+		}
+
 		public CLIOptions build() {
 			return new CLIOptions(model, yoloMode, allFiles, timeout, debug, sandbox, sandboxImage, includeDirectories,
-					extensions, proxy, mcpServers);
+					extensions, proxy, mcpServers, outputFormat);
 		}
 
 	}

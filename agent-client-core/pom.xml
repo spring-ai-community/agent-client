@@ -50,6 +50,18 @@
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.springaicommunity.agents</groupId>
+            <artifactId>agent-codex</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springaicommunity.agents</groupId>
+            <artifactId>agent-amp</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
 
         <!-- Test dependencies -->
         <dependency>

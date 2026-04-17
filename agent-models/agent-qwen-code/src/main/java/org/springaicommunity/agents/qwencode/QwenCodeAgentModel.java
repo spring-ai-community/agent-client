@@ -33,6 +33,7 @@ import org.springaicommunity.agents.model.AgentModel;
 import org.springaicommunity.agents.model.AgentResponse;
 import org.springaicommunity.agents.model.AgentResponseMetadata;
 import org.springaicommunity.agents.model.AgentTaskRequest;
+import org.springaicommunity.agents.model.StructuredOutputPromptHelper;
 
 /**
  * Implementation of {@link AgentModel} for Qwen Code CLI-based agents.
@@ -74,6 +75,12 @@ public class QwenCodeAgentModel implements AgentModel {
 	@Override
 	public AgentResponse call(AgentTaskRequest request) {
 		String goal = request.goal();
+
+		// Tier 3: embed schema in prompt when jsonSchema is present
+		if (request.options() != null && request.options().getJsonSchema() != null) {
+			goal = StructuredOutputPromptHelper.wrapGoalWithSchema(goal, request.options().getJsonSchema());
+		}
+
 		logger.info("Executing Qwen Code agent with goal: {}", goal);
 
 		QwenCodeAgentOptions options = mergeOptions(request);

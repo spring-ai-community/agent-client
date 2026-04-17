@@ -19,6 +19,7 @@ package org.springaicommunity.agents.client;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import org.springaicommunity.agents.client.advisor.api.AgentCallAdvisor;
@@ -159,6 +160,14 @@ public interface AgentClient {
 		 * @return this request spec for chaining
 		 */
 		AgentClientRequestSpec mcpServers(List<String> serverNames);
+
+		/**
+		 * Set a JSON schema for structured output. When set, the agent model will enforce
+		 * that its response conforms to this schema.
+		 * @param jsonSchema the JSON schema as a map
+		 * @return this request spec for chaining
+		 */
+		AgentClientRequestSpec jsonSchema(Map<String, Object> jsonSchema);
 
 		/**
 		 * Execute the agent task and return the result.

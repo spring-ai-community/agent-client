@@ -28,6 +28,7 @@ import org.springaicommunity.agents.model.AgentGeneration;
 import org.springaicommunity.agents.model.AgentGenerationMetadata;
 import org.springaicommunity.agents.model.AgentModel;
 import org.springaicommunity.agents.model.AgentTaskRequest;
+import org.springaicommunity.agents.model.StructuredOutputPromptHelper;
 import org.springaicommunity.sandbox.Sandbox;
 import org.springaicommunity.sandbox.ExecResult;
 import org.springaicommunity.sandbox.ExecSpec;
@@ -346,7 +347,14 @@ public class SweAgentModel implements AgentModel {
 		prompt.append("IMPORTANT: You must execute the command 'echo \"COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT\"' ");
 		prompt.append("as a bash command (not just mention it in text) when the task is finished.\n\n");
 
-		return prompt.toString();
+		String result = prompt.toString();
+
+		// Tier 3: embed schema in prompt when jsonSchema is present
+		if (request.options() != null && request.options().getJsonSchema() != null) {
+			result = StructuredOutputPromptHelper.wrapGoalWithSchema(result, request.options().getJsonSchema());
+		}
+
+		return result;
 	}
 
 	/**

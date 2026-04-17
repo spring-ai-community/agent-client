@@ -22,6 +22,7 @@ import org.springaicommunity.agents.amazonqsdk.AmazonQClient;
 import org.springaicommunity.agents.amazonqsdk.types.ExecuteOptions;
 import org.springaicommunity.agents.amazonqsdk.types.ExecuteResult;
 import org.springaicommunity.agents.model.*;
+import org.springaicommunity.agents.model.StructuredOutputPromptHelper;
 import org.springaicommunity.sandbox.Sandbox;
 
 import java.util.List;
@@ -69,6 +70,12 @@ public class AmazonQAgentModel implements AgentModel {
 	public AgentResponse call(AgentTaskRequest request) {
 		// Extract goal/prompt from request
 		String goal = request.goal();
+
+		// Tier 3: embed schema in prompt when jsonSchema is present
+		if (request.options() != null && request.options().getJsonSchema() != null) {
+			goal = StructuredOutputPromptHelper.wrapGoalWithSchema(goal, request.options().getJsonSchema());
+		}
+
 		logger.info("Executing Amazon Q agent with goal: {}", goal);
 
 		// Merge options

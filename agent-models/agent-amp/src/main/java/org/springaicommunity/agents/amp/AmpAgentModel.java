@@ -23,6 +23,7 @@ import org.springaicommunity.agents.ampsdk.AmpClient;
 import org.springaicommunity.agents.ampsdk.types.ExecuteOptions;
 import org.springaicommunity.agents.ampsdk.types.ExecuteResult;
 import org.springaicommunity.agents.model.*;
+import org.springaicommunity.agents.model.StructuredOutputPromptHelper;
 import org.springaicommunity.sandbox.Sandbox;
 
 import java.time.Duration;
@@ -71,6 +72,12 @@ public class AmpAgentModel implements AgentModel {
 	public AgentResponse call(AgentTaskRequest request) {
 		// Extract goal/prompt from request
 		String goal = request.goal();
+
+		// Tier 3: embed schema in prompt when jsonSchema is present
+		if (request.options() != null && request.options().getJsonSchema() != null) {
+			goal = StructuredOutputPromptHelper.wrapGoalWithSchema(goal, request.options().getJsonSchema());
+		}
+
 		logger.info("Executing Amp agent with goal: {}", goal);
 
 		// Merge options

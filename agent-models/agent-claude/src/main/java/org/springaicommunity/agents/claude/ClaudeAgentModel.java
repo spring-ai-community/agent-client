@@ -255,7 +255,17 @@ public class ClaudeAgentModel implements AgentModel, StreamingAgentModel, Iterab
 			}
 
 			PhaseCapture capture = SessionLogParser.parse(response, "agent-run", prompt);
-			String textOutput = capture.textOutput() != null ? capture.textOutput() : "";
+			// When --json-schema is active, prefer rawResult (the constrained output)
+			// over textOutput (which may contain conversational prose)
+			boolean hasJsonSchema = options.getJsonSchema() != null && !options.getJsonSchema().isEmpty();
+			String textOutput;
+			if (hasJsonSchema && capture.rawResult() != null && !capture.rawResult().isEmpty()) {
+				textOutput = capture.rawResult();
+			}
+			else {
+				textOutput = capture.textOutput() != null && !capture.textOutput().isEmpty() ? capture.textOutput()
+						: (capture.rawResult() != null ? capture.rawResult() : "");
+			}
 
 			Duration duration = Duration.between(startTime, Instant.now());
 			AgentGenerationMetadata generationMetadata = new AgentGenerationMetadata("SUCCESS", Map.of());
@@ -452,7 +462,7 @@ public class ClaudeAgentModel implements AgentModel, StreamingAgentModel, Iterab
 		return null;
 	}
 
-	private CLIOptions buildCLIOptions(AgentTaskRequest request) {
+	CLIOptions buildCLIOptions(AgentTaskRequest request) {
 		ClaudeAgentOptions options = getEffectiveOptions(request);
 		CLIOptions.Builder builder = CLIOptions.builder();
 
@@ -508,9 +518,16 @@ public class ClaudeAgentModel implements AgentModel, StreamingAgentModel, Iterab
 			builder.disallowedTools(options.getDisallowedTools());
 		}
 
-		// Structured output
+		// Structured output — check Claude-specific options first, then portable
 		if (options.getJsonSchema() != null && !options.getJsonSchema().isEmpty()) {
 			builder.jsonSchema(options.getJsonSchema());
+		}
+		else {
+			AgentOptions portableOpts = request.options();
+			if (portableOpts != null && portableOpts.getJsonSchema() != null
+					&& !portableOpts.getJsonSchema().isEmpty()) {
+				builder.jsonSchema(portableOpts.getJsonSchema());
+			}
 		}
 
 		// MCP servers: merge portable definitions (from AgentOptions) with

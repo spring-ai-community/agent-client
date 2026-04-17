@@ -32,6 +32,7 @@ import org.springaicommunity.agents.model.AgentOptions;
 import org.springaicommunity.agents.model.AgentResponse;
 import org.springaicommunity.agents.model.AgentResponseMetadata;
 import org.springaicommunity.agents.model.AgentTaskRequest;
+import org.springaicommunity.agents.model.StructuredOutputPromptHelper;
 import org.springaicommunity.agents.model.mcp.McpServerDefinition;
 import org.springaicommunity.sandbox.ExecResult;
 import org.springaicommunity.sandbox.ExecSpec;
@@ -259,6 +260,11 @@ public class GeminiAgentModel implements AgentModel {
 			builder.mcpServers(mcpServers);
 		}
 
+		// Set JSON output mode when jsonSchema is present
+		if (portableOptions != null && portableOptions.getJsonSchema() != null) {
+			builder.outputFormat("json");
+		}
+
 		return builder.build();
 	}
 
@@ -293,7 +299,16 @@ public class GeminiAgentModel implements AgentModel {
 		prompt.append(
 				"Important: If the task involves creating a file, make sure to actually create it with the exact content requested.\n\n");
 
-		return prompt.toString();
+		String result = prompt.toString();
+
+		// Prepend schema instructions when jsonSchema is present (Tier 2: JSON output
+		// mode enabled)
+		AgentOptions options = request.options();
+		if (options != null && options.getJsonSchema() != null) {
+			result = StructuredOutputPromptHelper.wrapGoalWithSchema(result, options.getJsonSchema(), true);
+		}
+
+		return result;
 	}
 
 	/**
