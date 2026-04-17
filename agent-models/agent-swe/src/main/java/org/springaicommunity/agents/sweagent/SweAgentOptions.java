@@ -18,6 +18,8 @@ package org.springaicommunity.agents.sweagent;
 
 import org.springaicommunity.agents.model.AgentOptions;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.time.Duration;
 import java.util.Map;
 
@@ -32,41 +34,49 @@ public class SweAgentOptions implements AgentOptions {
 	/**
 	 * The model name to use for the underlying LLM (e.g., "claude-3-5-sonnet", "gpt-4").
 	 */
+	@JsonProperty("model")
 	private String model;
 
 	/**
 	 * Timeout for agent execution.
 	 */
+	@JsonProperty("timeout")
 	private Duration timeout = Duration.ofMinutes(5);
 
 	/**
 	 * Working directory for agent execution. If null, uses system temp directory.
 	 */
+	@JsonProperty("workingDirectory")
 	private String workingDirectory;
 
 	/**
 	 * Environment variables to set for the agent process.
 	 */
+	@JsonProperty("environmentVariables")
 	private Map<String, String> environmentVariables = Map.of();
 
 	/**
 	 * Extra provider-specific options for forward compatibility.
 	 */
+	@JsonProperty("extras")
 	private Map<String, Object> extras = Map.of();
 
 	/**
 	 * Path to the mini-SWE-agent CLI executable. If null, uses default discovery.
 	 */
+	@JsonProperty("executablePath")
 	private String executablePath;
 
 	/**
 	 * Maximum number of iterations the agent will attempt before stopping.
 	 */
+	@JsonProperty("maxIterations")
 	private int maxIterations = 20;
 
 	/**
 	 * Whether to use verbose output from the mini-SWE-agent CLI.
 	 */
+	@JsonProperty("verbose")
 	private boolean verbose = false;
 
 	public SweAgentOptions() {

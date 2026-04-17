@@ -19,6 +19,8 @@ package org.springaicommunity.agents.tck;
 import org.springaicommunity.agents.model.AgentOptions;
 import org.springaicommunity.agents.model.mcp.McpServerDefinition;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.time.Duration;
 import java.util.Map;
 
@@ -32,6 +34,7 @@ import java.util.Map;
  */
 public final class PortableMcpAgentOptions implements AgentOptions {
 
+	@JsonProperty("mcpDefinitions")
 	private final Map<String, McpServerDefinition> mcpDefinitions;
 
 	public PortableMcpAgentOptions(Map<String, McpServerDefinition> mcpDefinitions) {

@@ -31,6 +31,7 @@ import org.springaicommunity.claude.agent.sdk.types.ResultMessage;
 import io.github.markpollack.journal.claude.PhaseCapture;
 import io.github.markpollack.journal.claude.SessionLogParser;
 import org.springaicommunity.agents.model.AgentGeneration;
+import org.springaicommunity.agents.model.AgentOptionsUtils;
 import org.springaicommunity.agents.model.AgentGenerationMetadata;
 import org.springaicommunity.agents.model.AgentModel;
 import org.springaicommunity.agents.model.AgentOptions;
@@ -563,7 +564,7 @@ public class ClaudeAgentModel implements AgentModel, StreamingAgentModel, Iterab
 
 	private ClaudeAgentOptions getEffectiveOptions(AgentTaskRequest request) {
 		if (request.options() instanceof ClaudeAgentOptions requestOptions) {
-			return requestOptions;
+			return AgentOptionsUtils.merge(requestOptions, defaultOptions, ClaudeAgentOptions.class);
 		}
 		return defaultOptions;
 	}

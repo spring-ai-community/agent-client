@@ -26,6 +26,7 @@ import java.util.Objects;
 import org.springaicommunity.agents.client.advisor.api.AgentCallAdvisor;
 import org.springaicommunity.agents.model.AgentModel;
 import org.springaicommunity.agents.model.AgentOptions;
+import org.springaicommunity.agents.model.AgentOptionsUtils;
 import org.springaicommunity.agents.model.mcp.McpServerCatalog;
 
 /**
@@ -60,18 +61,21 @@ public class DefaultAgentClientBuilder implements AgentClient.Builder {
 
 	@Override
 	public AgentClient.Builder defaultWorkingDirectory(Path workingDirectory) {
-		// Build new options with the working directory
-		this.defaultOptions = DefaultAgentOptions.builder()
-			.from(this.defaultOptions)
+		// Create patch options with the working directory
+		DefaultAgentOptions patch = DefaultAgentOptions.builder()
 			.workingDirectory(workingDirectory != null ? workingDirectory.toString() : null)
 			.build();
+		// Merge patch into existing options, preserving the original type
+		this.defaultOptions = AgentOptionsUtils.merge(patch, this.defaultOptions, this.defaultOptions.getClass());
 		return this;
 	}
 
 	@Override
 	public AgentClient.Builder defaultTimeout(Duration timeout) {
-		// Build new options with the timeout
-		this.defaultOptions = DefaultAgentOptions.builder().from(this.defaultOptions).timeout(timeout).build();
+		// Create patch options with the timeout
+		DefaultAgentOptions patch = DefaultAgentOptions.builder().timeout(timeout).build();
+		// Merge patch into existing options, preserving the original type
+		this.defaultOptions = AgentOptionsUtils.merge(patch, this.defaultOptions, this.defaultOptions.getClass());
 		return this;
 	}
 

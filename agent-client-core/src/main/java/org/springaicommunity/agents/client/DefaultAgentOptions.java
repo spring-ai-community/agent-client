@@ -20,6 +20,8 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import org.springaicommunity.agents.model.AgentOptions;
 import org.springaicommunity.agents.model.mcp.McpServerDefinition;
 
@@ -31,16 +33,22 @@ import org.springaicommunity.agents.model.mcp.McpServerDefinition;
  */
 public class DefaultAgentOptions implements AgentOptions {
 
+	@JsonProperty("workingDirectory")
 	private String workingDirectory;
 
+	@JsonProperty("timeout")
 	private Duration timeout = Duration.ofMinutes(10);
 
+	@JsonProperty("environmentVariables")
 	private Map<String, String> environmentVariables = new HashMap<>();
 
+	@JsonProperty("model")
 	private String model;
 
+	@JsonProperty("extras")
 	private Map<String, Object> extras = new HashMap<>();
 
+	@JsonProperty("mcpServerDefinitions")
 	private Map<String, McpServerDefinition> mcpServerDefinitions = Map.of();
 
 	public DefaultAgentOptions() {

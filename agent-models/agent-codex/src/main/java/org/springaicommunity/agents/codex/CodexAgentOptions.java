@@ -21,6 +21,8 @@ import org.springaicommunity.agents.codexsdk.types.SandboxMode;
 import org.springaicommunity.agents.model.AgentOptions;
 
 import java.nio.file.Path;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.time.Duration;
 import java.util.Map;
 
@@ -32,28 +34,40 @@ import java.util.Map;
  */
 public class CodexAgentOptions implements AgentOptions {
 
+	@JsonProperty("model")
 	private String model = "gpt-5-codex";
 
+	@JsonProperty("timeout")
 	private Duration timeout = Duration.ofMinutes(10);
 
+	@JsonProperty("sandboxMode")
 	private SandboxMode sandboxMode = SandboxMode.WORKSPACE_WRITE;
 
+	@JsonProperty("approvalPolicy")
 	private ApprovalPolicy approvalPolicy = ApprovalPolicy.NEVER;
 
+	@JsonProperty("fullAuto")
 	private boolean fullAuto = true;
 
+	@JsonProperty("skipGitCheck")
 	private boolean skipGitCheck = false;
 
+	@JsonProperty("dangerouslyBypassSandbox")
 	private boolean dangerouslyBypassSandbox = false;
 
+	@JsonProperty("executablePath")
 	private String executablePath;
 
+	@JsonProperty("outputSchema")
 	private Path outputSchema;
 
+	@JsonProperty("workingDirectory")
 	private String workingDirectory;
 
+	@JsonProperty("environmentVariables")
 	private Map<String, String> environmentVariables = Map.of();
 
+	@JsonProperty("extras")
 	private Map<String, Object> extras = Map.of();
 
 	private CodexAgentOptions() {

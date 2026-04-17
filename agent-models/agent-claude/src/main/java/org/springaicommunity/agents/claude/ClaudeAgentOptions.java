@@ -19,6 +19,8 @@ package org.springaicommunity.agents.claude;
 import org.springaicommunity.claude.agent.sdk.mcp.McpServerConfig;
 import org.springaicommunity.agents.model.AgentOptions;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
@@ -35,31 +37,37 @@ public class ClaudeAgentOptions implements AgentOptions {
 	/**
 	 * The model name to use (e.g., "claude-sonnet-4-20250514" or "sonnet").
 	 */
+	@JsonProperty("model")
 	private String model;
 
 	/**
 	 * Timeout for agent execution.
 	 */
+	@JsonProperty("timeout")
 	private Duration timeout = Duration.ofMinutes(10);
 
 	/**
 	 * Working directory for agent execution. If null, uses system temp directory.
 	 */
+	@JsonProperty("workingDirectory")
 	private String workingDirectory;
 
 	/**
 	 * Environment variables to set for the agent process.
 	 */
+	@JsonProperty("environmentVariables")
 	private Map<String, String> environmentVariables = Map.of();
 
 	/**
 	 * Extra provider-specific options for forward compatibility.
 	 */
+	@JsonProperty("extras")
 	private Map<String, Object> extras = Map.of();
 
 	/**
 	 * Path to the Claude CLI executable. If null, uses default discovery.
 	 */
+	@JsonProperty("executablePath")
 	private String executablePath;
 
 	/**
@@ -68,12 +76,14 @@ public class ClaudeAgentOptions implements AgentOptions {
 	 * file modifications, command execution, and potentially destructive operations. USE
 	 * WITH EXTREME CAUTION - This is the most dangerous permission mode.
 	 */
+	@JsonProperty("yolo")
 	private boolean yolo = true;
 
 	/**
 	 * System prompt configuration. Can be either a simple string or a preset
 	 * configuration. Default is null (no system prompt).
 	 */
+	@JsonProperty("systemPrompt")
 	private SystemPrompt systemPrompt;
 
 	/**
@@ -81,73 +91,87 @@ public class ClaudeAgentOptions implements AgentOptions {
 	 * settings loaded). This ensures SDK applications have predictable behavior
 	 * independent of local filesystem configurations.
 	 */
+	@JsonProperty("settingSources")
 	private List<SettingSource> settingSources = List.of();
 
 	/**
 	 * Programmatic subagent definitions. Allows defining agents inline without filesystem
 	 * dependencies.
 	 */
+	@JsonProperty("agents")
 	private Map<String, AgentDefinition> agents = Map.of();
 
 	/**
 	 * When true, resumed sessions will fork to a new session ID rather than continuing
 	 * the previous session.
 	 */
+	@JsonProperty("forkSession")
 	private boolean forkSession = false;
 
 	/**
 	 * Include partial message events for real-time UI streaming.
 	 */
+	@JsonProperty("includePartialMessages")
 	private boolean includePartialMessages = false;
 
 	/**
 	 * Maximum thinking tokens for extended thinking mode.
 	 */
+	@JsonProperty("maxThinkingTokens")
 	private Integer maxThinkingTokens;
 
 	/**
 	 * Maximum tokens for the response.
 	 */
+	@JsonProperty("maxTokens")
 	private Integer maxTokens;
 
 	/**
 	 * List of tools that are allowed to be used.
 	 */
+	@JsonProperty("allowedTools")
 	private List<String> allowedTools = List.of();
 
 	/**
 	 * List of tools that are not allowed to be used.
 	 */
+	@JsonProperty("disallowedTools")
 	private List<String> disallowedTools = List.of();
 
 	/**
 	 * JSON schema for structured output.
 	 */
+	@JsonProperty("jsonSchema")
 	private Map<String, Object> jsonSchema;
 
 	/**
 	 * MCP server configurations.
 	 */
+	@JsonProperty("mcpServers")
 	private Map<String, McpServerConfig> mcpServers = new HashMap<>();
 
 	/**
 	 * Maximum number of agentic turns before stopping.
 	 */
+	@JsonProperty("maxTurns")
 	private Integer maxTurns;
 
 	/**
 	 * Maximum budget in USD before stopping.
 	 */
+	@JsonProperty("maxBudgetUsd")
 	private Double maxBudgetUsd;
 
 	/**
 	 * Fallback model to use if the primary model is unavailable.
 	 */
+	@JsonProperty("fallbackModel")
 	private String fallbackModel;
 
 	/**
 	 * Additional text to append to the default system prompt.
 	 */
+	@JsonProperty("appendSystemPrompt")
 	private String appendSystemPrompt;
 
 	public ClaudeAgentOptions() {

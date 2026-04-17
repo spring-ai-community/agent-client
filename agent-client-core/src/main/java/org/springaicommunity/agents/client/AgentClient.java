@@ -161,6 +161,14 @@ public interface AgentClient {
 		AgentClientRequestSpec mcpServers(List<String> serverNames);
 
 		/**
+		 * Set options for this agent request. These options will be merged with the
+		 * default options from the AgentClient.
+		 * @param options the agent options
+		 * @return this request spec for chaining
+		 */
+		AgentClientRequestSpec options(AgentOptions options);
+
+		/**
 		 * Execute the agent task and return the result.
 		 *
 		 * In agent terminology, we **run a goal** (task execution). This differs from
