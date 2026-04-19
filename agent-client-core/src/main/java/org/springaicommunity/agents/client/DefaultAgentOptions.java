@@ -45,6 +45,12 @@ public class DefaultAgentOptions implements AgentOptions {
 
 	private Map<String, Object> jsonSchema;
 
+	private Integer maxTurns;
+
+	private boolean autoApprove = true;
+
+	private String systemInstructions;
+
 	public DefaultAgentOptions() {
 	}
 
@@ -120,6 +126,33 @@ public class DefaultAgentOptions implements AgentOptions {
 		this.jsonSchema = jsonSchema != null ? new HashMap<>(jsonSchema) : null;
 	}
 
+	@Override
+	public Integer getMaxTurns() {
+		return this.maxTurns;
+	}
+
+	public void setMaxTurns(Integer maxTurns) {
+		this.maxTurns = maxTurns;
+	}
+
+	@Override
+	public boolean isAutoApprove() {
+		return this.autoApprove;
+	}
+
+	public void setAutoApprove(boolean autoApprove) {
+		this.autoApprove = autoApprove;
+	}
+
+	@Override
+	public String getSystemInstructions() {
+		return this.systemInstructions;
+	}
+
+	public void setSystemInstructions(String systemInstructions) {
+		this.systemInstructions = systemInstructions;
+	}
+
 	public static Builder builder() {
 		return new Builder();
 	}
@@ -139,6 +172,12 @@ public class DefaultAgentOptions implements AgentOptions {
 		private Map<String, McpServerDefinition> mcpServerDefinitions = Map.of();
 
 		private Map<String, Object> jsonSchema;
+
+		private Integer maxTurns;
+
+		private boolean autoApprove = true;
+
+		private String systemInstructions;
 
 		public Builder workingDirectory(String workingDirectory) {
 			this.workingDirectory = workingDirectory;
@@ -176,6 +215,21 @@ public class DefaultAgentOptions implements AgentOptions {
 			return this;
 		}
 
+		public Builder maxTurns(Integer maxTurns) {
+			this.maxTurns = maxTurns;
+			return this;
+		}
+
+		public Builder autoApprove(boolean autoApprove) {
+			this.autoApprove = autoApprove;
+			return this;
+		}
+
+		public Builder systemInstructions(String systemInstructions) {
+			this.systemInstructions = systemInstructions;
+			return this;
+		}
+
 		// IMPORTANT: When adding fields to DefaultAgentOptions, update this method.
 		public Builder from(AgentOptions agentOptions) {
 			if (agentOptions != null) {
@@ -190,6 +244,9 @@ public class DefaultAgentOptions implements AgentOptions {
 						? agentOptions.getMcpServerDefinitions() : Map.of();
 				this.jsonSchema = agentOptions.getJsonSchema() != null ? new HashMap<>(agentOptions.getJsonSchema())
 						: null;
+				this.maxTurns = agentOptions.getMaxTurns();
+				this.autoApprove = agentOptions.isAutoApprove();
+				this.systemInstructions = agentOptions.getSystemInstructions();
 			}
 			return this;
 		}
@@ -203,6 +260,9 @@ public class DefaultAgentOptions implements AgentOptions {
 			options.setExtras(this.extras);
 			options.setMcpServerDefinitions(this.mcpServerDefinitions);
 			options.setJsonSchema(this.jsonSchema);
+			options.setMaxTurns(this.maxTurns);
+			options.setAutoApprove(this.autoApprove);
+			options.setSystemInstructions(this.systemInstructions);
 			return options;
 		}
 

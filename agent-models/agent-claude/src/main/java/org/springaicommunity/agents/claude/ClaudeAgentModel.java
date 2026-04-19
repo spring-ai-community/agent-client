@@ -477,7 +477,13 @@ public class ClaudeAgentModel implements AgentModel, StreamingAgentModel, Iterab
 			builder.model(options.getModel());
 		}
 
-		if (options.isYolo()) {
+		// Auto-approve: Claude-specific yolo if ClaudeAgentOptions, otherwise portable
+		// isAutoApprove()
+		boolean autoApprove = options.isYolo();
+		if (!(request.options() instanceof ClaudeAgentOptions) && request.options() != null) {
+			autoApprove = request.options().isAutoApprove();
+		}
+		if (autoApprove) {
 			builder.permissionMode(
 					org.springaicommunity.claude.agent.sdk.config.PermissionMode.DANGEROUSLY_SKIP_PERMISSIONS);
 		}
@@ -557,9 +563,12 @@ public class ClaudeAgentModel implements AgentModel, StreamingAgentModel, Iterab
 			builder.mcpServers(mergedMcpServers);
 		}
 
-		// Budget control
+		// Max turns: Claude-specific first, then portable fallback
 		if (options.getMaxTurns() != null) {
 			builder.maxTurns(options.getMaxTurns());
+		}
+		else if (request.options() != null && request.options().getMaxTurns() != null) {
+			builder.maxTurns(request.options().getMaxTurns());
 		}
 		if (options.getMaxBudgetUsd() != null) {
 			builder.maxBudgetUsd(options.getMaxBudgetUsd());
@@ -570,9 +579,13 @@ public class ClaudeAgentModel implements AgentModel, StreamingAgentModel, Iterab
 			builder.fallbackModel(options.getFallbackModel());
 		}
 
-		// Append system prompt (uses preset mode)
+		// Append system prompt: Claude-specific first, then portable fallback
 		if (options.getAppendSystemPrompt() != null && !options.getAppendSystemPrompt().isEmpty()) {
 			builder.appendSystemPrompt(options.getAppendSystemPrompt());
+		}
+		else if (request.options() != null && request.options().getSystemInstructions() != null
+				&& !request.options().getSystemInstructions().isEmpty()) {
+			builder.appendSystemPrompt(request.options().getSystemInstructions());
 		}
 
 		return builder.build();

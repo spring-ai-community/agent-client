@@ -243,8 +243,12 @@ public class GeminiAgentModel implements AgentModel {
 			builder.model(options.getModel());
 		}
 
-		// Set yolo mode for autonomous operation
-		builder.yoloMode(options.isYolo());
+		// Auto-approve: Gemini-specific yolo if GeminiAgentOptions, otherwise portable
+		boolean autoApprove = options.isYolo();
+		if (!(request.options() instanceof GeminiAgentOptions) && request.options() != null) {
+			autoApprove = request.options().isAutoApprove();
+		}
+		builder.yoloMode(autoApprove);
 
 		// MCP servers: translate portable definitions to Gemini format
 		Map<String, Object> mcpServers = new LinkedHashMap<>();
@@ -298,6 +302,12 @@ public class GeminiAgentModel implements AgentModel {
 
 		prompt.append(
 				"Important: If the task involves creating a file, make sure to actually create it with the exact content requested.\n\n");
+
+		// Portable system prompt support
+		if (request.options() != null && request.options().getSystemInstructions() != null
+				&& !request.options().getSystemInstructions().isEmpty()) {
+			prompt.append("Additional context:\n").append(request.options().getSystemInstructions()).append("\n\n");
+		}
 
 		String result = prompt.toString();
 

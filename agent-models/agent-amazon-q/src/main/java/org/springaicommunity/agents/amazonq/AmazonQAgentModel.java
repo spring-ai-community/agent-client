@@ -68,8 +68,12 @@ public class AmazonQAgentModel implements AgentModel {
 
 	@Override
 	public AgentResponse call(AgentTaskRequest request) {
-		// Extract goal/prompt from request
+		// Extract goal/prompt from request, with portable system prompt prepended
 		String goal = request.goal();
+		if (request.options() != null && request.options().getSystemInstructions() != null
+				&& !request.options().getSystemInstructions().isEmpty()) {
+			goal = request.options().getSystemInstructions() + "\n\n" + goal;
+		}
 
 		// Tier 3: embed schema in prompt when jsonSchema is present
 		if (request.options() != null && request.options().getJsonSchema() != null) {

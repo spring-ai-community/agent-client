@@ -76,6 +76,12 @@ public class QwenCodeAgentModel implements AgentModel {
 	public AgentResponse call(AgentTaskRequest request) {
 		String goal = request.goal();
 
+		// Portable system prompt support
+		if (request.options() != null && request.options().getSystemInstructions() != null
+				&& !request.options().getSystemInstructions().isEmpty()) {
+			goal = request.options().getSystemInstructions() + "\n\n" + goal;
+		}
+
 		// Tier 3: embed schema in prompt when jsonSchema is present
 		if (request.options() != null && request.options().getJsonSchema() != null) {
 			goal = StructuredOutputPromptHelper.wrapGoalWithSchema(goal, request.options().getJsonSchema());
@@ -109,6 +115,11 @@ public class QwenCodeAgentModel implements AgentModel {
 
 		if (defaultOptions.getPermissionMode() != null) {
 			builder.permissionMode(defaultOptions.getPermissionMode());
+		}
+
+		// Portable option fallbacks (when request is not QwenCodeAgentOptions)
+		if (request.options() != null && !(request.options() instanceof QwenCodeAgentOptions)) {
+			builder.yolo(request.options().isAutoApprove());
 		}
 
 		if (request.options() != null && request.options() instanceof QwenCodeAgentOptions requestOptions) {

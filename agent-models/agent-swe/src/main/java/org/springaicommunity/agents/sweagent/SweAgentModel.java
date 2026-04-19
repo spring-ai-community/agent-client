@@ -307,8 +307,16 @@ public class SweAgentModel implements AgentModel {
 			builder.executablePath(options.getExecutablePath());
 		}
 
-		// Set max iterations
-		builder.maxIterations(options.getMaxIterations());
+		// Set max iterations: SWE-specific first, then portable fallback
+		if (options.getMaxIterations() > 0) {
+			builder.maxIterations(options.getMaxIterations());
+		}
+		else if (request.options() != null && request.options().getMaxTurns() != null) {
+			builder.maxIterations(request.options().getMaxTurns());
+		}
+		else {
+			builder.maxIterations(options.getMaxIterations());
+		}
 
 		// Set verbose mode
 		builder.verbose(options.isVerbose());

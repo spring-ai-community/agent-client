@@ -84,4 +84,37 @@ public interface AgentOptions extends ModelOptions {
 		return null;
 	}
 
+	/**
+	 * Get the maximum number of agentic turns/iterations. When set, the agent should stop
+	 * after this many turns. Provider-specific options take precedence over this portable
+	 * setting.
+	 * @return the max turns, or {@code null} to use the provider's default
+	 */
+	default Integer getMaxTurns() {
+		return null;
+	}
+
+	/**
+	 * Whether the agent should skip all permission prompts and run autonomously. When
+	 * {@code true}, the agent will not ask for user confirmation before executing
+	 * actions. Maps to provider-specific flags (e.g., Claude's {@code --yolo}, Codex's
+	 * {@code --full-auto}). Provider-specific options take precedence over this portable
+	 * setting.
+	 * @return {@code true} to auto-approve all actions, {@code false} to prompt
+	 */
+	default boolean isAutoApprove() {
+		return true;
+	}
+
+	/**
+	 * Get the system instructions to append to the agent's context. Provides
+	 * domain-specific context or constraints. Maps to provider-specific mechanisms (e.g.,
+	 * Claude's {@code --append-system-prompt}, prompt wrapping for other providers).
+	 * Provider-specific options take precedence over this portable setting.
+	 * @return the system instructions, or {@code null} if not set
+	 */
+	default String getSystemInstructions() {
+		return null;
+	}
+
 }
