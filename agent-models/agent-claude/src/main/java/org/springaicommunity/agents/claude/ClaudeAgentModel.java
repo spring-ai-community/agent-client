@@ -603,18 +603,7 @@ public class ClaudeAgentModel implements AgentModel, StreamingAgentModel, Iterab
 	}
 
 	private String formatPrompt(AgentTaskRequest request) {
-		StringBuilder prompt = new StringBuilder();
-		if (request.workingDirectory() != null) {
-			prompt.append("You are working in directory: ")
-				.append(request.workingDirectory().toString())
-				.append("\n\n");
-		}
-		prompt.append("Task: ").append(request.goal()).append("\n\n");
-		prompt.append("Instructions:\n");
-		prompt.append("1. Analyze the files in the working directory\n");
-		prompt.append("2. Complete the requested task by making necessary changes\n");
-		prompt.append("3. Ensure the changes fix the problem\n\n");
-		return prompt.toString();
+		return request.goal();
 	}
 
 	// Package-private for testing
