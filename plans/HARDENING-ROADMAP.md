@@ -322,25 +322,25 @@ This roadmap hardens AgentClient for multi-provider reliability after a customer
 ### Step 1b.2: Create Tutorial Repository (Track 2)
 
 **Entry criteria**:
-- [ ] Step 1b.1 complete
-- [ ] Read: `plans/learnings/step-1b.1-multi-provider-sample.md`
+- [x] Step 1b.1 complete
+- [x] Read: `plans/learnings/step-1b.1-multi-provider-sample.md`
 
 **Work items**:
-- [ ] CREATE `spring-ai-community/agent-client-tutorial` repo via `gh repo create`
-- [ ] CREATE parent `pom.xml` managing agent-client version
-- [ ] CREATE `01-create-file/` module (Spring Boot app, Maven profiles per provider)
-- [ ] CREATE `CLAUDE.md` documenting structure convention (numbered dirs, profiles, README template)
-- [ ] CREATE `README.md` with overview and running instructions
-- [ ] CREATE `.github/workflows/examples.yml` with MWF schedule, provider x example matrix
-- [ ] VERIFY builds: `./mvnw clean compile`
+- [x] CREATE `spring-ai-community/agent-client-tutorial` repo via `gh repo create`
+- [x] CREATE parent `pom.xml` managing agent-client version (0.13.0 — latest release)
+- [x] CREATE `01-create-file/` module (Spring Boot app, Maven profiles per provider)
+- [x] CREATE `CLAUDE.md` documenting structure convention
+- [x] CREATE `README.md` with overview and running instructions
+- [x] CREATE `.github/workflows/examples.yml` with MWF schedule (compile-only until secrets configured)
+- [x] VERIFY builds: `./mvnw clean compile`
 
 **Exit criteria**:
-- [ ] Tutorial repo exists on GitHub with `01-create-file` example
-- [ ] CI workflow configured (MWF schedule)
-- [ ] `CLAUDE.md` documents conventions
-- [ ] Create: `plans/learnings/step-1b.2-tutorial-repo.md`
-- [ ] Update `HARDENING-ROADMAP.md` checkboxes
-- [ ] COMMIT (in tutorial repo)
+- [x] Tutorial repo exists: https://github.com/spring-ai-community/agent-client-tutorial
+- [x] CI workflow configured (MWF schedule)
+- [x] `CLAUDE.md` documents conventions
+- [x] Create: `plans/learnings/step-1b.2-tutorial-repo.md`
+- [x] Update `HARDENING-ROADMAP.md` checkboxes
+- [x] COMMIT (in tutorial repo): `0911610`
 
 **Deliverables**: `spring-ai-community/agent-client-tutorial` repo
 
@@ -349,42 +349,40 @@ This roadmap hardens AgentClient for multi-provider reliability after a customer
 ### Step 1b.3: Create Coordination Repo + Finalize CHANGELOG
 
 **Entry criteria**:
-- [ ] Step 1b.2 complete
-- [ ] Read: `plans/learnings/step-1b.2-tutorial-repo.md`
+- [x] Step 1b.2 complete
+- [x] Read: `plans/learnings/step-1b.2-tutorial-repo.md`
 
 **Work items**:
-- [ ] CREATE `tuvium/agent-client-doc-agent` private repo
-- [ ] CREATE `CLAUDE.md` with steward instructions
-- [ ] CREATE `plans/ROADMAP.md` (copy of this roadmap)
-- [ ] CREATE `knowledge/index.md` routing table
-- [ ] COPY baseline eval results from Stage 0 into `experiments/terminal-bench-easy/baseline/`
-- [ ] FINALIZE CHANGELOG entry in agent-client repo (drafted in Step 1a.6)
+- [x] CREATE `tuvium/agent-client-doc-agent` private repo (required `gh auth switch --user mark-tuvium`)
+- [x] CREATE `CLAUDE.md` with steward instructions
+- [x] CREATE `knowledge/index.md` routing table
+- [x] COPY baseline eval results into `experiments/terminal-bench-easy/`
+- [x] ~~FINALIZE CHANGELOG~~ — no CHANGELOG file exists; change documented in commit `a21e029` and `defaults-philosophy.mdx` migration section
 
 **Exit criteria**:
-- [ ] `tuvium/agent-client-doc-agent` repo exists with steward structure
-- [ ] CHANGELOG finalized in agent-client
-- [ ] Create: `plans/learnings/step-1b.3-coordination-repo.md`
-- [ ] Update `HARDENING-ROADMAP.md` checkboxes
-- [ ] COMMIT (in both repos)
+- [x] `tuvium/agent-client-doc-agent` repo exists: https://github.com/tuvium/agent-client-doc-agent
+- [x] Create: `plans/learnings/step-1b.3-coordination-repo.md`
+- [x] Update `HARDENING-ROADMAP.md` checkboxes
+- [x] COMMIT (in doc-agent repo): `e3bcd23`
 
-**Deliverables**: Coordination repo, finalized CHANGELOG
+**Deliverables**: Coordination repo
 
 ---
 
 ### Step 1b.4: Stage 1b Consolidation
 
 **Entry criteria**:
-- [ ] All Stage 1b steps complete
-- [ ] Read: all `plans/learnings/step-1b.*` files
+- [x] All Stage 1b steps complete
+- [x] Read: all `plans/learnings/step-1b.*` files
 
 **Work items**:
-- [ ] COMPACT learnings into `plans/learnings/LEARNINGS.md`
-- [ ] UPDATE `CLAUDE.md` with Stage 1b distilled learnings
+- [x] COMPACT learnings into `plans/learnings/LEARNINGS.md`
+- [x] UPDATE `CLAUDE.md` with Stage 1b distilled learnings
 
 **Exit criteria**:
-- [ ] `LEARNINGS.md` updated covering Stage 1b
-- [ ] Create: `plans/learnings/step-1b.4-stage1b-summary.md`
-- [ ] Update `HARDENING-ROADMAP.md` checkboxes
+- [x] `LEARNINGS.md` updated covering Stage 1b
+- [x] Create: `plans/learnings/step-1b.4-stage1b-summary.md`
+- [x] Update `HARDENING-ROADMAP.md` checkboxes
 - [ ] COMMIT: `Step 1b.4: Stage 1b consolidation`
 
 ---

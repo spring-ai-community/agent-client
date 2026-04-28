@@ -1,7 +1,7 @@
 # Learnings: AgentClient Multi-Provider Hardening
 
-> **Last compacted**: 2026-04-26T00:00-04:00
-> **Covers through**: Stage 1a complete + Stage 1b (partial: 1b.1)
+> **Last compacted**: 2026-04-26T01:00-04:00
+> **Covers through**: Stage 1b complete
 
 This is the **Tier 1 compacted summary**. Read this first for the current state of project knowledge. For details on specific steps, see the per-step files (Tier 2).
 
@@ -56,7 +56,8 @@ This is the **Tier 1 compacted summary**. Read this first for the current state 
 |-------|--------|
 | Stage 0 | Complete |
 | Stage 1a | Complete |
-| Stage 1b | In progress (1b.1 done, 1b.2-1b.4 remaining) |
+| Stage 1b | Complete |
+| Stage 2 | Not started |
 
 ---
 
@@ -75,6 +76,9 @@ This is the **Tier 1 compacted summary**. Read this first for the current state 
 | `step-1a.6-defaults-philosophy.md` | 1a.6 | Defaults philosophy doc — LOOSE/STRICT, precedence, migration |
 | `step-1a.7-stage1a-summary.md` | 1a.7 | Stage 1a consolidation |
 | `step-1b.1-multi-provider-sample.md` | 1b.1 | Multi-provider sample — Maven profiles, portable API |
+| `step-1b.2-tutorial-repo.md` | 1b.2 | Tutorial repo — agent-client-tutorial on GitHub |
+| `step-1b.3-coordination-repo.md` | 1b.3 | Coordination repo — tuvium/agent-client-doc-agent |
+| `step-1b.4-stage1b-summary.md` | 1b.4 | Stage 1b consolidation |
 
 ---
 
