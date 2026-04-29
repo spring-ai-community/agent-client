@@ -558,7 +558,18 @@ This roadmap hardens AgentClient for multi-provider reliability after a customer
 
 ---
 
-## Stage 4: Terminal-Bench Post-Change Evaluation
+## Stage 4: LOOSE Permission Discovery via Terminal-Bench
+
+> **Purpose**: Use terminal-bench easy-tier tasks as the test suite for discovering what permissions and configuration LOOSE mode needs to derive for each provider. Every task failure caused by a missing permission/config becomes a new LOOSE derivation — just like `skipGitCheck` was the first one discovered from the Joachim incident.
+>
+> The 5 tasks exercise different capabilities:
+> | Task | Capability | What a failure reveals |
+> |------|-----------|----------------------|
+> | `hello-world` | File creation in arbitrary directory | Missing write/directory permissions |
+> | `fix-git` | Git operations | Missing git access or sandbox restrictions |
+> | `broken-python` | Shell commands, error output | Missing command execution permissions |
+> | `fix-permissions` | System commands (chmod) | Missing system-level sandbox flags |
+> | `heterogeneous-dates` | File read + transform + write | Missing read/write scope |
 
 ### Step 4.0: Stage 4 Entry
 
@@ -568,63 +579,64 @@ This roadmap hardens AgentClient for multi-provider reliability after a customer
 - [ ] Read: `experiments/terminal-bench-easy/baseline/` — Stage 0 results
 
 **Work items**:
-- [ ] REVIEW baseline results
-- [ ] VERIFY mode system and all provider defaults are stable on main
+- [ ] REVIEW Stage 0 baseline — which tasks failed and why
+- [ ] VERIFY 0.15.0 released with LOOSE mode defaults
+- [ ] DOCUMENT current LOOSE derivations (only `skipGitCheck=true` for Codex today)
 
 **Exit criteria**:
-- [ ] Context loaded, baseline reviewed
+- [ ] Baseline reviewed, current LOOSE scope documented
 - [ ] Create: `plans/learnings/step-4.0-stage4-entry.md`
 - [ ] Update `HARDENING-ROADMAP.md` checkboxes
 
 ---
 
-### Step 4.1: Post-Change Evaluation
+### Step 4.1: Run Easy Tier with LOOSE Defaults
 
 **Entry criteria**:
 - [ ] Step 4.0 complete
 - [ ] Read: `plans/learnings/step-4.0-stage4-entry.md`
 
 **Work items**:
-- [ ] RUN all 5 terminal-bench tasks with Claude (LOOSE mode, no workarounds)
-- [ ] RUN all 5 terminal-bench tasks with Codex (LOOSE mode, no workarounds)
-- [ ] RUN all 5 terminal-bench tasks with Gemini (LOOSE mode, no workarounds)
+- [ ] RUN all 5 terminal-bench tasks with Claude (LOOSE mode, zero explicit config)
+- [ ] RUN all 5 terminal-bench tasks with Codex (LOOSE mode, zero explicit config)
+- [ ] RUN all 5 terminal-bench tasks with Gemini (LOOSE mode, zero explicit config)
+- [ ] For each failure: CLASSIFY as permission/config issue vs task complexity issue
 - [ ] RECORD results in `experiments/terminal-bench-easy/results/`
-- [ ] COMPARE against Stage 0 baseline
 
 **Exit criteria**:
-- [ ] Post-change results archived
-- [ ] Comparison matrix (baseline vs post-change) documented
-- [ ] Create: `plans/learnings/step-4.1-post-change-eval.md`
+- [ ] Results archived with pass/fail per task per provider
+- [ ] Each failure classified: permission gap vs task difficulty
+- [ ] Create: `plans/learnings/step-4.1-loose-discovery.md`
 - [ ] Update `HARDENING-ROADMAP.md` checkboxes
 - [ ] COMMIT
 
-**Deliverables**: Post-change eval results + comparison matrix
+**Deliverables**: Per-provider pass/fail matrix with failure classification
 
 ---
 
-### Step 4.2: Friction Report + Promotion Recommendations
+### Step 4.2: Implement New LOOSE Derivations
 
 **Entry criteria**:
 - [ ] Step 4.1 complete
-- [ ] Read: `plans/learnings/step-4.1-post-change-eval.md`
+- [ ] Read: `plans/learnings/step-4.1-loose-discovery.md`
 
 **Work items**:
-- [ ] WRITE `experiments/terminal-bench-easy/friction-report.md` applying promotion rubric:
-  1. ≥2 of 3 providers have semantic equivalent
-  2. Absence causes easy-tier failures (evidence)
-  3. Expressible without leaking provider concepts
-- [ ] DOCUMENT options that meet rubric (candidates for portable promotion)
-- [ ] DOCUMENT options that don't meet rubric ("stays provider-specific" — re-evaluate only when new provider adds equivalent or results change)
-- [ ] UPDATE `portable-options.mdx` with rubric and findings
+- [ ] For each permission-gap failure discovered in 4.1:
+  - IDENTIFY the provider-specific option that fixes it
+  - IMPLEMENT LOOSE derivation in the provider's `*Properties` class (same pattern as `skipGitCheck`)
+  - VERIFY the task now passes with LOOSE defaults
+- [ ] DOCUMENT derivations that cannot be added to LOOSE (too dangerous, provider-specific with no portable semantics)
+- [ ] UPDATE `defaults-philosophy.mdx` with expanded LOOSE scope
+- [ ] UPDATE reference pages with new mode-derived defaults
 
 **Exit criteria**:
-- [ ] Friction report complete with evidence-backed recommendations
-- [ ] Promotion rubric documented in `portable-options.mdx`
-- [ ] Create: `plans/learnings/step-4.2-friction-report.md`
+- [ ] All permission-gap failures resolved by LOOSE derivations (or documented as intentionally excluded)
+- [ ] Re-run of easy tier passes with LOOSE defaults
+- [ ] Create: `plans/learnings/step-4.2-loose-derivations.md`
 - [ ] Update `HARDENING-ROADMAP.md` checkboxes
 - [ ] COMMIT
 
-**Deliverables**: Friction report with promotion recommendations
+**Deliverables**: Expanded LOOSE mode covering easy-tier permission surface
 
 ---
 
@@ -632,7 +644,7 @@ This roadmap hardens AgentClient for multi-provider reliability after a customer
 
 **Entry criteria**:
 - [ ] Step 4.2 complete
-- [ ] Read: `plans/learnings/step-4.2-friction-report.md`
+- [ ] Read: `plans/learnings/step-4.2-loose-derivations.md`
 
 **Work items**:
 - [ ] CREATE `02-read-and-transform/` in tutorial repo (read file, transform, write result)
@@ -658,11 +670,11 @@ This roadmap hardens AgentClient for multi-provider reliability after a customer
 
 **Work items**:
 - [ ] COMPACT learnings into `plans/learnings/LEARNINGS.md`
-- [ ] UPDATE `CLAUDE.md` with full project learnings
-- [ ] UPDATE doc-agent repo KB with friction findings
+- [ ] UPDATE `CLAUDE.md` with LOOSE permission scope
+- [ ] DOCUMENT final LOOSE derivation table (provider × option × value)
 
 **Exit criteria**:
-- [ ] `LEARNINGS.md` reflects complete project state
+- [ ] `LEARNINGS.md` reflects complete LOOSE permission scope
 - [ ] Create: `plans/learnings/step-4.4-stage4-summary.md`
 - [ ] Update `HARDENING-ROADMAP.md` checkboxes
 - [ ] COMMIT
