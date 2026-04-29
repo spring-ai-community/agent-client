@@ -1,7 +1,7 @@
 # Learnings: AgentClient Multi-Provider Hardening
 
-> **Last compacted**: 2026-04-26T01:00-04:00
-> **Covers through**: Stage 1b complete
+> **Last compacted**: 2026-04-29T15:15-04:00
+> **Covers through**: Stage 2 complete
 
 This is the **Tier 1 compacted summary**. Read this first for the current state of project knowledge. For details on specific steps, see the per-step files (Tier 2).
 
@@ -29,6 +29,14 @@ This is the **Tier 1 compacted summary**. Read this first for the current state 
    - *Source*: Step 1a.3
    - *Impact*: Track for resolution in Stage 1b or next session.
 
+6. **QDox is the right tool for extracting Javadoc from source** — reflection cannot access Javadoc (stripped at compile time). QDox parses source files directly, extracting field names, types, initializers, and Javadoc comments in one pass.
+   - *Source*: Step 2.1
+   - *Impact*: Docgen tool in `tools/agent-options-docgen/` uses QDox to generate reference tables.
+
+7. **Claude has 18 options — split standard vs advanced** — too many for one reference table. Standard options (13) cover common use. Advanced options (7) provide Python SDK parity for power users.
+   - *Source*: Step 2.2
+   - *Impact*: Reference page structure: standard table + advanced table with clear labeling.
+
 ## Patterns Established
 
 - **SDK neutral, agent-models translates**: `ExecuteOptions.skipGitCheck` stays at CLI-native default (`false`). `CodexAgentProperties.isSkipGitCheck()` derives the effective value from mode.
@@ -36,6 +44,8 @@ This is the **Tier 1 compacted summary**. Read this first for the current state 
 - **Evidence-based baselines**: Derive baselines from code structure when evidence is clear. Save API spend for post-change eval.
 - **Provider-specific setUp, portable tests**: Parity IT subclasses differ only in `@BeforeEach` setup and `getProvider()`. All scenarios inherited from TCK.
 - **ProcessBuilder OK in tests**: zt-exec mandate applies to production code. Tests use `ProcessBuilder` for simple one-liners.
+- **Inline tables over Snippet includes**: Generated reference content goes directly into .mdx pages rather than using Mintlify `<Snippet>` cross-file includes. Simpler maintenance, one place to edit.
+- **Standalone docgen tool**: `tools/agent-options-docgen/` is a standalone Maven module (not in parent POM). Run via `./mvnw -f tools/agent-options-docgen/pom.xml compile exec:java`.
 
 ## Deviations from Design
 
@@ -57,7 +67,7 @@ This is the **Tier 1 compacted summary**. Read this first for the current state 
 | Stage 0 | Complete |
 | Stage 1a | Complete |
 | Stage 1b | Complete |
-| Stage 2 | Not started |
+| Stage 2 | Complete |
 
 ---
 
@@ -79,6 +89,10 @@ This is the **Tier 1 compacted summary**. Read this first for the current state 
 | `step-1b.2-tutorial-repo.md` | 1b.2 | Tutorial repo — agent-client-tutorial on GitHub |
 | `step-1b.3-coordination-repo.md` | 1b.3 | Coordination repo — tuvium/agent-client-doc-agent |
 | `step-1b.4-stage1b-summary.md` | 1b.4 | Stage 1b consolidation |
+| `step-2.0-stage2-entry.md` | 2.0 | Stage 2 entry — properties inventory, mintlify-docs state |
+| `step-2.1-docgen-tool.md` | 2.1 | Docgen tool — QDox source parser, Markdown table generator |
+| `step-2.2-reference-pages.md` | 2.2 | Reference pages — 4 .mdx pages, mint.json nav update |
+| `step-2.3-stage2-summary.md` | 2.3 | Stage 2 consolidation |
 
 ---
 
@@ -89,3 +103,4 @@ This is the **Tier 1 compacted summary**. Read this first for the current state 
 | 2026-04-24T15:30-04:00 | Initial draft | Roadmap created |
 | 2026-04-25T00:15-04:00 | Added Stage 0 + partial 1a findings | Steps 0.1-1a.5 complete |
 | 2026-04-26T00:00-04:00 | Stage 1a consolidation | All Stage 1a steps complete |
+| 2026-04-29T15:15-04:00 | Stage 2 consolidation | Docgen tool + reference pages complete |

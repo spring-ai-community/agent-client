@@ -392,81 +392,79 @@ This roadmap hardens AgentClient for multi-provider reliability after a customer
 ### Step 2.0: Stage 2 Entry + Context Load
 
 **Entry criteria**:
-- [ ] Stage 1b consolidation complete — Read: `plans/learnings/step-1b.4-stage1b-summary.md`
-- [ ] Read: `plans/learnings/LEARNINGS.md`
+- [x] Stage 1b consolidation complete — Read: `plans/learnings/step-1b.4-stage1b-summary.md`
+- [x] Read: `plans/learnings/LEARNINGS.md`
 
 **Work items**:
-- [ ] REVIEW Stage 1b summary for open questions
-- [ ] VERIFY all provider auto-configs + mode system stable on main
-- [ ] REVIEW existing mintlify-docs structure for agent-client pages
+- [x] REVIEW Stage 1b summary for open questions
+- [x] VERIFY all provider auto-configs + mode system stable on main
+- [x] REVIEW existing mintlify-docs structure for agent-client pages
 
 **Exit criteria**:
-- [ ] Context loaded, no blockers
-- [ ] Create: `plans/learnings/step-2.0-stage2-entry.md`
-- [ ] Update `HARDENING-ROADMAP.md` checkboxes
+- [x] Context loaded, no blockers
+- [x] Create: `plans/learnings/step-2.0-stage2-entry.md`
+- [x] Update `HARDENING-ROADMAP.md` checkboxes
 
 ---
 
-### Step 2.1: Reference Doc Generation Plugin
+### Step 2.1: Reference Doc Generation Tool
 
 **Entry criteria**:
-- [ ] Step 2.0 complete
-- [ ] Read: `plans/learnings/step-2.0-stage2-entry.md`
+- [x] Step 2.0 complete
+- [x] Read: `plans/learnings/step-2.0-stage2-entry.md`
 
 **Work items**:
-- [ ] CREATE `tools/agent-options-docgen/pom.xml` (Maven plugin, not under agent-models)
-- [ ] IMPLEMENT plugin that reads `*AgentOptions` and `*AgentProperties` classes, emits Markdown tables
-- [ ] GENERATE initial tables for Claude, Codex, Gemini
-- [ ] VERIFY generated output matches actual field inventory
+- [x] CREATE `tools/agent-options-docgen/pom.xml` (standalone Maven module, not under agent-models)
+- [x] IMPLEMENT tool that reads `*AgentProperties` source files via QDox, emits Markdown tables
+- [x] GENERATE initial tables for Claude, Codex, Gemini
+- [x] VERIFY generated output matches actual field inventory (22 Claude, 6 Codex, 6 Gemini)
 
 **Exit criteria**:
-- [ ] Plugin generates accurate Markdown tables for all 3 providers
-- [ ] Create: `plans/learnings/step-2.1-docgen-plugin.md`
-- [ ] Update `HARDENING-ROADMAP.md` checkboxes
-- [ ] COMMIT: `Step 2.1: Add agent-options-docgen Maven plugin`
+- [x] Tool generates accurate Markdown tables for all 3 providers
+- [x] Create: `plans/learnings/step-2.1-docgen-tool.md`
+- [x] Update `HARDENING-ROADMAP.md` checkboxes
 
-**Deliverables**: `tools/agent-options-docgen/` Maven plugin
+**Deliverables**: `tools/agent-options-docgen/` Maven module
 
 ---
 
 ### Step 2.2: Write Reference Pages
 
 **Entry criteria**:
-- [ ] Step 2.1 complete
-- [ ] Read: `plans/learnings/step-2.1-docgen-plugin.md`
+- [x] Step 2.1 complete
+- [x] Read: `plans/learnings/step-2.1-docgen-tool.md`
 
 **Work items**:
-- [ ] CREATE `agent-client/portable-options.mdx` (AgentOptions interface, mode system, precedence, promotion rubric)
-- [ ] CREATE `agent-client/claude-reference.mdx` (include generated table via Snippet)
-- [ ] CREATE `agent-client/codex-reference.mdx` (include generated table + skipGitCheck migration note)
-- [ ] CREATE `agent-client/gemini-reference.mdx` (include generated table)
-- [ ] UPDATE `mint.json` navigation with Reference group
+- [x] CREATE `agent-client/portable-options.mdx` (AgentOptions interface, mode system, precedence, promotion rubric)
+- [x] CREATE `agent-client/claude-reference.mdx` (standard + advanced tables, permission modes, tool filtering, budget controls)
+- [x] CREATE `agent-client/codex-reference.mdx` (skipGitCheck/mode interaction table + migration note)
+- [x] CREATE `agent-client/gemini-reference.mdx` (properties + temperature guidance)
+- [x] UPDATE `mint.json` navigation with Reference subgroup
 
 **Exit criteria**:
-- [ ] All 5 reference pages render correctly in `mintlify dev`
-- [ ] Generated tables included via Snippet
-- [ ] Create: `plans/learnings/step-2.2-reference-pages.md`
-- [ ] Update `HARDENING-ROADMAP.md` checkboxes
-- [ ] COMMIT (in mintlify-docs repo)
+- [x] 4 reference pages created with accurate property tables
+- [x] Tables inline (not via Snippet — simpler maintenance)
+- [x] Create: `plans/learnings/step-2.2-reference-pages.md`
+- [x] Update `HARDENING-ROADMAP.md` checkboxes
 
-**Deliverables**: 5 reference pages in mintlify-docs
+**Deliverables**: 4 reference pages in mintlify-docs + nav update
 
 ---
 
 ### Step 2.3: Stage 2 Consolidation
 
 **Entry criteria**:
-- [ ] Steps 2.1-2.2 complete
-- [ ] Read: all `plans/learnings/step-2.*` files
+- [x] Steps 2.1-2.2 complete
+- [x] Read: all `plans/learnings/step-2.*` files
 
 **Work items**:
-- [ ] COMPACT learnings into `plans/learnings/LEARNINGS.md`
-- [ ] UPDATE `CLAUDE.md`
+- [x] COMPACT learnings into `plans/learnings/LEARNINGS.md`
+- [x] UPDATE `CLAUDE.md`
 
 **Exit criteria**:
-- [ ] `LEARNINGS.md` updated
-- [ ] Create: `plans/learnings/step-2.3-stage2-summary.md`
-- [ ] Update `HARDENING-ROADMAP.md` checkboxes
+- [x] `LEARNINGS.md` updated
+- [x] Create: `plans/learnings/step-2.3-stage2-summary.md`
+- [x] Update `HARDENING-ROADMAP.md` checkboxes
 - [ ] COMMIT
 
 ---
@@ -517,11 +515,39 @@ This roadmap hardens AgentClient for multi-provider reliability after a customer
 
 ---
 
-### Step 3.2: Onramp Metric + Stage 3 Consolidation
+### Step 3.2: Diataxis Navigation Restructure
 
 **Entry criteria**:
-- [ ] Step 3.1 complete
+- [ ] Step 3.1 complete — all How-to and Tutorial pages exist
 - [ ] Read: `plans/learnings/step-3.1-howto-tutorial-pages.md`
+- [ ] Read: `~/tuvium/projects/forge-methodology/concepts/documentation-taxonomy.md` — Diataxis framework
+
+**Work items**:
+- [ ] RESTRUCTURE `mint.json` Agent Client nav to expose all four Diataxis quadrants:
+  - **Reference**: portable-options, claude-reference, codex-reference, gemini-reference
+  - **Explanation**: defaults-philosophy, sessions (or split sessions into reference + how-to)
+  - **How-to**: getting-started, switching-providers, structured-output
+  - **Tutorial**: tutorial/index, 01-first-task, 02-multi-provider
+- [ ] VERIFY nav renders correctly — each quadrant is a visible named group
+- [ ] REVIEW `sessions.mdx` — determine if it's pure Reference or needs splitting into Reference (API surface) + How-to (usage patterns)
+- [ ] VERIFY cross-links between quadrants work (e.g., Reference pages link to relevant How-to, Tutorials link to Reference for deeper detail)
+
+**Exit criteria**:
+- [ ] All four Diataxis quadrants visible as named groups in Agent Client sidebar
+- [ ] Each page lives in exactly one quadrant (no mixed-purpose pages)
+- [ ] Create: `plans/learnings/step-3.2-diataxis-nav.md`
+- [ ] Update `HARDENING-ROADMAP.md` checkboxes
+- [ ] COMMIT (in mintlify-docs repo)
+
+**Deliverables**: Diataxis-aligned navigation structure for agent-client docs
+
+---
+
+### Step 3.3: Onramp Metric + Stage 3 Consolidation
+
+**Entry criteria**:
+- [ ] Step 3.2 complete
+- [ ] Read: `plans/learnings/step-3.2-diataxis-nav.md`
 
 **Work items**:
 - [ ] ADD onramp timing to tutorial CI workflow (ApplicationStartedEvent to AgentClientResponse)
@@ -531,7 +557,7 @@ This roadmap hardens AgentClient for multi-provider reliability after a customer
 **Exit criteria**:
 - [ ] Onramp metric defined and wired into CI
 - [ ] `LEARNINGS.md` updated
-- [ ] Create: `plans/learnings/step-3.2-stage3-summary.md`
+- [ ] Create: `plans/learnings/step-3.3-stage3-summary.md`
 - [ ] Update `HARDENING-ROADMAP.md` checkboxes
 - [ ] COMMIT
 
@@ -542,7 +568,7 @@ This roadmap hardens AgentClient for multi-provider reliability after a customer
 ### Step 4.0: Stage 4 Entry
 
 **Entry criteria**:
-- [ ] Stage 3 consolidation complete — Read: `plans/learnings/step-3.2-stage3-summary.md`
+- [ ] Stage 3 consolidation complete — Read: `plans/learnings/step-3.3-stage3-summary.md`
 - [ ] Read: `plans/learnings/LEARNINGS.md`
 - [ ] Read: `experiments/terminal-bench-easy/baseline/` — Stage 0 results
 
@@ -650,15 +676,74 @@ This roadmap hardens AgentClient for multi-provider reliability after a customer
 
 ## Stage 5: Iteration (Future)
 
-### Step 5.1: Portable Option Promotions
+### Step 5.0: Extract AgentClient Autoconfigure Module
+
+**Problem:** `agent-client-core` depends on `spring-boot-autoconfigure` for a single file (`AgentClientAutoConfiguration.java`). The core API (`AgentClient`, `Goal`, `AgentClientResponse`) should be usable without Spring Boot.
+
+**Entry criteria**:
+- [ ] Stage 4 complete
+- [ ] Read: `plans/learnings/LEARNINGS.md`
+
+**Work items**:
+- [ ] CREATE `agent-client-autoconfigure/` module (or fold `AgentClientAutoConfiguration` into starters)
+- [ ] MOVE `AgentClientAutoConfiguration.java` out of `agent-client-core`
+- [ ] REMOVE `spring-boot-autoconfigure` dependency from `agent-client-core/pom.xml`
+- [ ] VERIFY `agent-client-core` compiles with zero Spring Boot dependencies
+- [ ] VERIFY starters still auto-configure `AgentClient.Builder` bean
+- [ ] UPDATE tutorial and sample projects if imports changed
+
+**Exit criteria**:
+- [ ] `agent-client-core` has no Spring Boot dependency
+- [ ] All starters work unchanged
+- [ ] `./mvnw clean compile` passes
+- [ ] Create: `plans/learnings/step-5.0-autoconfigure-extraction.md`
+- [ ] COMMIT
+
+**Deliverables**: Clean separation — core API is plain Java, autoconfigure is a separate module
+
+---
+
+### Step 5.1: Rename AgentModel → AgentApi
+
+**Problem:** `AgentModel` implies the interface represents an AI model, but it actually represents the programmatic interface to a CLI agent runtime. `AgentApi` is more accurate and avoids confusion with Spring AI's `ChatModel` (which *does* wrap a model endpoint).
+
+**Deprecation strategy:** Thin shim inheritance for one release cycle. Old names extend new names as `@Deprecated` classes so existing user code compiles with warnings.
+
+**Entry criteria**:
+- [ ] Step 5.0 complete
+- [ ] Read: `plans/learnings/step-5.0-autoconfigure-extraction.md`
+
+**Work items**:
+- [ ] CREATE `AgentApi` interface in `agent-model` as the new name (same contract as `AgentModel`)
+- [ ] DEPRECATE `AgentModel` — make it extend `AgentApi` with `@Deprecated(since = "0.16.0", forRemoval = true)`
+- [ ] RENAME implementations: `ClaudeAgentModel` → `ClaudeAgentApi` (keep old class as deprecated shim extending new)
+  - Same for `CodexAgentModel` → `CodexAgentApi`, `GeminiAgentModel` → `GeminiAgentApi`, etc.
+- [ ] UPDATE `AgentClient.create()` and `AgentClient.builder()` to accept `AgentApi`
+- [ ] UPDATE auto-configurations to produce `AgentApi` beans (keep `AgentModel` bean via shim)
+- [ ] UPDATE all internal references to use new names
+- [ ] VERIFY `./mvnw clean compile` passes
+- [ ] VERIFY existing user code using old names still compiles (with deprecation warnings)
+- [ ] UPDATE documentation pages to use new names
+
+**Exit criteria**:
+- [ ] New names are primary, old names are deprecated shims
+- [ ] All tests pass
+- [ ] Create: `plans/learnings/step-5.1-agentapi-rename.md`
+- [ ] COMMIT
+
+**Deliverables**: `AgentModel` → `AgentApi` rename with deprecation shims
+
+---
+
+### Step 5.2: Portable Option Promotions
 
 Promote options meeting rubric to `AgentOptions` interface. Gated on Stage 4 evidence.
 
-### Step 5.2: Tutorial Examples 04-07
+### Step 5.3: Tutorial Examples 04-07
 
 Add structured output, sessions, MCP, advisors examples. Gated on Stage 4 evidence supporting priority.
 
-### Step 5.3: Tutorial Documentation Pages
+### Step 5.4: Tutorial Documentation Pages
 
 Write corresponding tutorial pages for new examples.
 

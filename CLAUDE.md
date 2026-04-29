@@ -473,18 +473,20 @@ Key requirements:
 - **No speculative wiring** — only Codex has mode-dependent behavior. Claude/Gemini properties untouched until a real STRICT knob is identified.
 - **Defaults philosophy**: STRICT is a baseline, not a lock. Explicit property overrides always win.
 
-### Completed (commit a21e029)
+### Completed
 
 - Stage 0: Baseline captured from code analysis
-- Steps 1a.4-1a.5: AgentClientMode enum + Codex skipGitCheck wiring
-- Step 1b.1: `samples/create-file-multi-provider/` with 3 provider profiles
+- Stage 1a: AgentClientMode enum, Codex skipGitCheck wiring, Parity TCK + CI matrix, `defaults-philosophy.mdx`
+- Stage 1b: Multi-provider sample, tutorial repo, coordination repo
+- Stage 2: Docgen tool (`tools/agent-options-docgen/`), 4 reference pages in mintlify-docs
+
+### Reference Doc Generation
+
+Run `./mvnw -f tools/agent-options-docgen/pom.xml compile exec:java -Dexec.args="<project-root> [output-dir]"` to regenerate Markdown reference tables from `*Properties.java` source files. Run before docs PRs when properties change.
 
 ### Remaining
 
-- Steps 1a.1-1a.3: Provider Parity TCK + CI matrix (Track 0)
-- Step 1a.6: `defaults-philosophy.mdx` documentation
-- Steps 1b.2-1b.3: Tutorial repo, coordination repo, CHANGELOG
-- Stages 2-5: Reference docs, how-to guides, terminal-bench eval
+- Stages 3-5: How-to guides, getting-started, terminal-bench eval
 
 ## Steward Mission
 
