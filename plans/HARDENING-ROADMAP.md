@@ -730,15 +730,48 @@ This roadmap hardens AgentClient for multi-provider reliability after a customer
 
 ---
 
-### Step 5.2: Portable Option Promotions
+### Step 5.2: Rename Property Prefix `spring.ai.agents` → `agent-client`
+
+**Problem:** `spring.ai.agents.*` implies the project is part of Spring AI, but it's a community project. The Spring AI team has expressed that this naming is not welcome. `agent-client.*` matches the project name and avoids borrowing credibility.
+
+**Deprecation strategy:** Accept both prefixes for one release. Log a warning on startup when old prefix is detected. Remove old prefix in the following release.
+
+**Entry criteria**:
+- [ ] Step 5.1 complete (combine with AgentApi rename for a single breaking-change release)
+- [ ] Read: `plans/learnings/step-5.1-agentapi-rename.md`
+
+**Work items**:
+- [ ] UPDATE all `@ConfigurationProperties(prefix = "spring.ai.agents.*")` to `agent-client.*`
+  - `agent-client.claude.*` (was `spring.ai.agents.claude-code`)
+  - `agent-client.codex.*` (was `spring.ai.agents.codex`)
+  - `agent-client.gemini.*` (was `spring.ai.agents.gemini`)
+  - `agent-client.mode` (was `spring.ai.agents.mode`)
+  - Same for amazon-q, amp, qwen-code
+- [ ] ADD deprecated property binding that maps old `spring.ai.agents.*` to new `agent-client.*` with startup warning
+- [ ] UPDATE all documentation (mintlify reference pages, README, CLAUDE.md)
+- [ ] UPDATE tutorial repo `application-*.yml` files
+- [ ] VERIFY `./mvnw clean compile` passes
+- [ ] VERIFY old properties still work (with deprecation warning)
+
+**Exit criteria**:
+- [ ] New prefix is primary, old prefix triggers deprecation warning
+- [ ] All tests pass
+- [ ] Create: `plans/learnings/step-5.2-property-prefix-rename.md`
+- [ ] COMMIT
+
+**Deliverables**: `spring.ai.agents.*` → `agent-client.*` property prefix with deprecation bridge
+
+---
+
+### Step 5.3: Portable Option Promotions
 
 Promote options meeting rubric to `AgentOptions` interface. Gated on Stage 4 evidence.
 
-### Step 5.3: Tutorial Examples 04-07
+### Step 5.4: Tutorial Examples 04-07
 
 Add structured output, sessions, MCP, advisors examples. Gated on Stage 4 evidence supporting priority.
 
-### Step 5.4: Tutorial Documentation Pages
+### Step 5.5: Tutorial Documentation Pages
 
 Write corresponding tutorial pages for new examples.
 
