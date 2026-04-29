@@ -13,7 +13,7 @@
 
     <groupId>org.springaicommunity.agents.samples</groupId>
     <artifactId>create-file-multi-provider</artifactId>
-    <version>0.14.0-SNAPSHOT</version>
+    <version>0.15.0</version>
     <packaging>jar</packaging>
 
     <name>Spring AI Agents - Create File Multi-Provider Sample</name>
@@ -25,7 +25,7 @@
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <agent-client.version>0.14.0-SNAPSHOT</agent-client.version>
+        <agent-client.version>0.15.0</agent-client.version>
     </properties>
 
     <profiles>
