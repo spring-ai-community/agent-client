@@ -493,15 +493,25 @@ Docs in `~/community/mintlify-docs/agent-client/` follow the Diataxis taxonomy:
 
 Run `./mvnw -f tools/agent-options-docgen/pom.xml compile exec:java -Dexec.args="<project-root> [output-dir]"` to regenerate Markdown reference tables from `*Properties.java` source files. Run before docs PRs when properties change.
 
-### Planned Architecture Changes (Stage 5)
+### LOOSE Derivation Table
 
-- **Step 5.0**: Extract `AgentClientAutoConfiguration` from `agent-client-core` into separate module — core API should have zero Spring Boot dependency
-- **Step 5.1**: Rename `AgentModel` → `AgentApi` with deprecation shims for one release cycle
+| Provider | Option | LOOSE | STRICT |
+|----------|--------|-------|--------|
+| Codex | `skipGitCheck` | `true` | `false` |
+| Codex | `dangerouslyBypassSandbox` | `true` | `false` |
+| Claude | `yolo` | `true` (default) | — |
+| Gemini | `yolo` | `true` (default) | — |
+
+### Known Gaps
+
+- **Global `spring.ai.agents.mode`** not implemented — only per-provider mode works (e.g. `spring.ai.agents.codex.mode`)
+- **No CLI arg validation tests** — SDK flag mappings drift as CLIs update
+- **No daily CI** against latest CLI versions
 
 ### Remaining
 
-- Stage 4: Terminal-bench post-change evaluation
-- Stage 5: Autoconfigure extraction, AgentModel→AgentApi rename, option promotions
+- Stage 4: Tutorial examples 02-03, consolidation
+- Stage 5: Autoconfigure extraction, AgentModel→AgentApi rename, property prefix rename, CLI validation tests, daily CI, global mode, option promotions
 
 ## Steward Mission
 

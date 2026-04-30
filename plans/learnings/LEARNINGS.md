@@ -1,7 +1,7 @@
 # Learnings: AgentClient Multi-Provider Hardening
 
-> **Last compacted**: 2026-04-29T16:00-04:00
-> **Covers through**: Stage 3 complete
+> **Last compacted**: 2026-04-29T21:15-04:00
+> **Covers through**: Stage 4 (partial — 4.0 + 4.1 complete)
 
 This is the **Tier 1 compacted summary**. Read this first for the current state of project knowledge. For details on specific steps, see the per-step files (Tier 2).
 
@@ -49,6 +49,26 @@ This is the **Tier 1 compacted summary**. Read this first for the current state 
     - *Source*: Step 3.1
     - *Impact*: One-release deprecation cycle. `ClaudeAgentModel` → `ClaudeAgentApi`, etc.
 
+11. **Codex `workspace-write` sandbox fails via bwrap** — `--full-auto` sets `workspace-write` which uses bubblewrap. Fails with `bwrap: loopback: Failed RTM_NEWADDR` in many environments. Terminal-bench uses `--sandbox danger-full-access` instead.
+    - *Source*: Step 4.1
+    - *Impact*: LOOSE now derives `dangerouslyBypassSandbox=true` for Codex.
+
+12. **Codex model `gpt-5-codex` removed in CLI 0.125.0** — old default caused CLI to hang on stdin. Updated to `gpt-5.4-mini`.
+    - *Source*: Step 4.1
+    - *Impact*: Default model updated across SDK, Properties, and all tests.
+
+13. **Gemini working directory not propagated** — `GeminiAgentModel` only passed working dir in prompt text, not to the actual `ProcessExecutor.directory()`. Files created in wrong location.
+    - *Source*: Step 4.1
+    - *Impact*: Added `workingDirOverride` param to `CLITransport.executeQuery()` and `GeminiClient.query()`.
+
+14. **Global `spring.ai.agents.mode` not implemented** — only per-provider `spring.ai.agents.codex.mode` works. Documented in `defaults-philosophy.mdx` but no central binding exists.
+    - *Source*: Step 4.1
+    - *Impact*: Added as Step 5.5 in roadmap.
+
+15. **No CLI arg validation tests** — SDK flag mappings drift as CLIs update. Model names, flag names, and stdin behavior change between versions. No automated check exists.
+    - *Source*: Step 4.1
+    - *Impact*: Added as Steps 5.3 (validation test) and 5.4 (daily CI) in roadmap.
+
 ## Patterns Established
 
 - **SDK neutral, agent-models translates**: `ExecuteOptions.skipGitCheck` stays at CLI-native default (`false`). `CodexAgentProperties.isSkipGitCheck()` derives the effective value from mode.
@@ -85,6 +105,7 @@ This is the **Tier 1 compacted summary**. Read this first for the current state 
 | Stage 1b | Complete |
 | Stage 2 | Complete |
 | Stage 3 | Complete (onramp metric deferred) |
+| Stage 4 | In progress (4.0 + 4.1 complete, 4.3-4.4 remaining) |
 
 ---
 
