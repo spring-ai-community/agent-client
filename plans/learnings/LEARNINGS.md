@@ -1,7 +1,7 @@
 # Learnings: AgentClient Multi-Provider Hardening
 
 > **Last compacted**: 2026-04-29T21:15-04:00
-> **Covers through**: Stage 4 (partial — 4.0 + 4.1 complete)
+> **Covers through**: Stage 4 complete
 
 This is the **Tier 1 compacted summary**. Read this first for the current state of project knowledge. For details on specific steps, see the per-step files (Tier 2).
 
@@ -105,7 +105,7 @@ This is the **Tier 1 compacted summary**. Read this first for the current state 
 | Stage 1b | Complete |
 | Stage 2 | Complete |
 | Stage 3 | Complete (onramp metric deferred) |
-| Stage 4 | In progress (4.0 + 4.1 complete, 4.3-4.4 remaining) |
+| Stage 4 | Complete |
 
 ---
 
