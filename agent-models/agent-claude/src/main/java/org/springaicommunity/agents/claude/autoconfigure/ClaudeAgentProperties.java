@@ -18,6 +18,7 @@ package org.springaicommunity.agents.claude.autoconfigure;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -69,6 +70,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  *         env:
  *           CUSTOM_API_KEY: "${CUSTOM_API_KEY}"
  *           DEBUG_MODE: "true"
+ *         # Enterprise API gateway configuration
+ *         api-key: "${ANTHROPIC_API_KEY}"
+ *         base-url: "https://proxy.example.com"
  *         max-buffer-size: 2097152
  *         user: claude-runner
  * </pre>
@@ -184,6 +188,20 @@ public class ClaudeAgentProperties {
 	 * Custom environment variables for the CLI process.
 	 */
 	private Map<String, String> env;
+
+	/**
+	 * API key for Anthropic API authentication. Translates to ANTHROPIC_API_KEY
+	 * environment variable in the CLI process. Takes precedence over env map entry for
+	 * ANTHROPIC_API_KEY.
+	 */
+	private String apiKey;
+
+	/**
+	 * Base URL for the Anthropic API. Use this to route requests through an API gateway
+	 * or proxy. Translates to ANTHROPIC_BASE_URL environment variable in the CLI process.
+	 * Takes precedence over env map entry for ANTHROPIC_BASE_URL.
+	 */
+	private String baseUrl;
 
 	/**
 	 * Maximum buffer size for JSON parsing in bytes (default 1MB).
@@ -359,6 +377,22 @@ public class ClaudeAgentProperties {
 		this.env = env;
 	}
 
+	public String getApiKey() {
+		return apiKey;
+	}
+
+	public void setApiKey(String apiKey) {
+		this.apiKey = apiKey;
+	}
+
+	public String getBaseUrl() {
+		return baseUrl;
+	}
+
+	public void setBaseUrl(String baseUrl) {
+		this.baseUrl = baseUrl;
+	}
+
 	public Integer getMaxBufferSize() {
 		return maxBufferSize;
 	}
@@ -460,9 +494,19 @@ public class ClaudeAgentProperties {
 			builder.extraArgs(extraArgs);
 		}
 
-		// Environment variables
+		// Environment variables: merge env map with explicit apiKey/baseUrl
+		Map<String, String> effectiveEnv = new HashMap<>();
 		if (env != null && !env.isEmpty()) {
-			builder.env(env);
+			effectiveEnv.putAll(env);
+		}
+		if (apiKey != null && !apiKey.isBlank()) {
+			effectiveEnv.put("ANTHROPIC_API_KEY", apiKey);
+		}
+		if (baseUrl != null && !baseUrl.isBlank()) {
+			effectiveEnv.put("ANTHROPIC_BASE_URL", baseUrl);
+		}
+		if (!effectiveEnv.isEmpty()) {
+			builder.env(effectiveEnv);
 		}
 
 		// Buffer size protection

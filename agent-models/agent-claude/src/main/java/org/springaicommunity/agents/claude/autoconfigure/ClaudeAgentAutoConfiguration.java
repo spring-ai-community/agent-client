@@ -100,6 +100,17 @@ public class ClaudeAgentAutoConfiguration {
 			optionsBuilder.mcpServers(mcpServers);
 		}
 
+		// API key and base URL for enterprise gateway support
+		if (properties.getApiKey() != null && !properties.getApiKey().isBlank()) {
+			optionsBuilder.apiKey(properties.getApiKey());
+		}
+		if (properties.getBaseUrl() != null && !properties.getBaseUrl().isBlank()) {
+			optionsBuilder.baseUrl(properties.getBaseUrl());
+		}
+		if (properties.getEnv() != null && !properties.getEnv().isEmpty()) {
+			optionsBuilder.environmentVariables(properties.getEnv());
+		}
+
 		ClaudeAgentOptions options = optionsBuilder.build();
 
 		ClaudeAgentModel.Builder builder = ClaudeAgentModel.builder()

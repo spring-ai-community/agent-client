@@ -150,6 +150,18 @@ public class ClaudeAgentOptions implements AgentOptions {
 	 */
 	private String appendSystemPrompt;
 
+	/**
+	 * API key for Anthropic API authentication. Translates to ANTHROPIC_API_KEY
+	 * environment variable in the CLI process.
+	 */
+	private String apiKey;
+
+	/**
+	 * Base URL for the Anthropic API (e.g., for API gateway/proxy routing). Translates to
+	 * ANTHROPIC_BASE_URL environment variable in the CLI process.
+	 */
+	private String baseUrl;
+
 	public ClaudeAgentOptions() {
 	}
 
@@ -325,6 +337,22 @@ public class ClaudeAgentOptions implements AgentOptions {
 		this.appendSystemPrompt = appendSystemPrompt;
 	}
 
+	public String getApiKey() {
+		return apiKey;
+	}
+
+	public void setApiKey(String apiKey) {
+		this.apiKey = apiKey;
+	}
+
+	public String getBaseUrl() {
+		return baseUrl;
+	}
+
+	public void setBaseUrl(String baseUrl) {
+		this.baseUrl = baseUrl;
+	}
+
 	@Override
 	public Map<String, Object> getExtras() {
 		return extras;
@@ -465,6 +493,16 @@ public class ClaudeAgentOptions implements AgentOptions {
 
 		public Builder appendSystemPrompt(String appendSystemPrompt) {
 			options.setAppendSystemPrompt(appendSystemPrompt);
+			return this;
+		}
+
+		public Builder apiKey(String apiKey) {
+			options.setApiKey(apiKey);
+			return this;
+		}
+
+		public Builder baseUrl(String baseUrl) {
+			options.setBaseUrl(baseUrl);
 			return this;
 		}
 

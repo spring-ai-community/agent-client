@@ -588,6 +588,21 @@ public class ClaudeAgentModel implements AgentModel, StreamingAgentModel, Iterab
 			builder.appendSystemPrompt(request.options().getSystemInstructions());
 		}
 
+		// Environment variable injection: environmentVariables, apiKey, baseUrl
+		Map<String, String> effectiveEnv = new HashMap<>();
+		if (options.getEnvironmentVariables() != null && !options.getEnvironmentVariables().isEmpty()) {
+			effectiveEnv.putAll(options.getEnvironmentVariables());
+		}
+		if (options.getApiKey() != null && !options.getApiKey().isBlank()) {
+			effectiveEnv.put("ANTHROPIC_API_KEY", options.getApiKey());
+		}
+		if (options.getBaseUrl() != null && !options.getBaseUrl().isBlank()) {
+			effectiveEnv.put("ANTHROPIC_BASE_URL", options.getBaseUrl());
+		}
+		if (!effectiveEnv.isEmpty()) {
+			builder.env(effectiveEnv);
+		}
+
 		return builder.build();
 	}
 

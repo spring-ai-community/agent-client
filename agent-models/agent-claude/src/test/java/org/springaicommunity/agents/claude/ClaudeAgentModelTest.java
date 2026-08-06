@@ -27,10 +27,13 @@ import org.springaicommunity.claude.agent.sdk.types.control.HookOutput;
 import org.springaicommunity.agents.model.AgentModel;
 import org.springaicommunity.agents.model.IterableAgentModel;
 import org.springaicommunity.agents.model.StreamingAgentModel;
+import org.springaicommunity.agents.model.AgentTaskRequest;
+import org.springaicommunity.claude.agent.sdk.transport.CLIOptions;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
@@ -439,6 +442,98 @@ class ClaudeAgentModelTest {
 				.build();
 
 			assertThat(model).isNotNull();
+		}
+
+	}
+
+	@Nested
+	@DisplayName("Environment Variable Injection Tests")
+	class EnvInjectionTests {
+
+		@Test
+		@DisplayName("apiKey translates to ANTHROPIC_API_KEY in CLI env")
+		void apiKeyTranslatesToEnv() {
+			ClaudeAgentOptions options = ClaudeAgentOptions.builder()
+				.model("claude-sonnet-4-5")
+				.apiKey("sk-test-key")
+				.build();
+			model = ClaudeAgentModel.builder().defaultOptions(options).build();
+
+			CLIOptions cliOptions = model.buildCLIOptions(new AgentTaskRequest("test", TEST_WORKING_DIR, options));
+
+			assertThat(cliOptions.getEnv()).containsEntry("ANTHROPIC_API_KEY", "sk-test-key");
+		}
+
+		@Test
+		@DisplayName("baseUrl translates to ANTHROPIC_BASE_URL in CLI env")
+		void baseUrlTranslatesToEnv() {
+			ClaudeAgentOptions options = ClaudeAgentOptions.builder()
+				.model("claude-sonnet-4-5")
+				.baseUrl("https://proxy.example.com")
+				.build();
+			model = ClaudeAgentModel.builder().defaultOptions(options).build();
+
+			CLIOptions cliOptions = model.buildCLIOptions(new AgentTaskRequest("test", TEST_WORKING_DIR, options));
+
+			assertThat(cliOptions.getEnv()).containsEntry("ANTHROPIC_BASE_URL", "https://proxy.example.com");
+		}
+
+		@Test
+		@DisplayName("apiKey overrides environmentVariables ANTHROPIC_API_KEY")
+		void apiKeyOverridesEnvironmentVariables() {
+			ClaudeAgentOptions options = ClaudeAgentOptions.builder()
+				.model("claude-sonnet-4-5")
+				.environmentVariables(Map.of("ANTHROPIC_API_KEY", "env-var-key"))
+				.apiKey("explicit-key")
+				.build();
+			model = ClaudeAgentModel.builder().defaultOptions(options).build();
+
+			CLIOptions cliOptions = model.buildCLIOptions(new AgentTaskRequest("test", TEST_WORKING_DIR, options));
+
+			assertThat(cliOptions.getEnv()).containsEntry("ANTHROPIC_API_KEY", "explicit-key");
+		}
+
+		@Test
+		@DisplayName("environmentVariables flows through to CLI env")
+		void environmentVariablesFlowThrough() {
+			ClaudeAgentOptions options = ClaudeAgentOptions.builder()
+				.model("claude-sonnet-4-5")
+				.environmentVariables(Map.of("CUSTOM_VAR", "custom-value"))
+				.build();
+			model = ClaudeAgentModel.builder().defaultOptions(options).build();
+
+			CLIOptions cliOptions = model.buildCLIOptions(new AgentTaskRequest("test", TEST_WORKING_DIR, options));
+
+			assertThat(cliOptions.getEnv()).containsEntry("CUSTOM_VAR", "custom-value");
+		}
+
+		@Test
+		@DisplayName("apiKey and baseUrl coexist with environmentVariables")
+		void allEnvSourcesCoexist() {
+			ClaudeAgentOptions options = ClaudeAgentOptions.builder()
+				.model("claude-sonnet-4-5")
+				.environmentVariables(Map.of("CUSTOM_VAR", "value"))
+				.apiKey("sk-test")
+				.baseUrl("https://proxy.example.com")
+				.build();
+			model = ClaudeAgentModel.builder().defaultOptions(options).build();
+
+			CLIOptions cliOptions = model.buildCLIOptions(new AgentTaskRequest("test", TEST_WORKING_DIR, options));
+
+			assertThat(cliOptions.getEnv()).containsEntry("CUSTOM_VAR", "value");
+			assertThat(cliOptions.getEnv()).containsEntry("ANTHROPIC_API_KEY", "sk-test");
+			assertThat(cliOptions.getEnv()).containsEntry("ANTHROPIC_BASE_URL", "https://proxy.example.com");
+		}
+
+		@Test
+		@DisplayName("No env injection when all fields are null")
+		void noEnvInjectionWhenNull() {
+			ClaudeAgentOptions options = ClaudeAgentOptions.builder().model("claude-sonnet-4-5").build();
+			model = ClaudeAgentModel.builder().defaultOptions(options).build();
+
+			CLIOptions cliOptions = model.buildCLIOptions(new AgentTaskRequest("test", TEST_WORKING_DIR, options));
+
+			assertThat(cliOptions.getEnv()).isNullOrEmpty();
 		}
 
 	}

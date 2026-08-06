@@ -53,11 +53,12 @@ class ClaudeAgentPropertiesTest {
 			assertThat(properties.getPermissionMode()).isNull();
 			assertThat(properties.getJsonSchema()).isNull();
 			assertThat(properties.getMaxTokens()).isNull();
-			// New budget control and fallback model defaults
 			assertThat(properties.getMaxTurns()).isNull();
 			assertThat(properties.getMaxBudgetUsd()).isNull();
 			assertThat(properties.getFallbackModel()).isNull();
 			assertThat(properties.getAppendSystemPrompt()).isNull();
+			assertThat(properties.getApiKey()).isNull();
+			assertThat(properties.getBaseUrl()).isNull();
 		}
 
 	}
@@ -157,7 +158,6 @@ class ClaudeAgentPropertiesTest {
 		void shouldUseBypassWhenYoloIsTrue() {
 			ClaudeAgentProperties properties = new ClaudeAgentProperties();
 			properties.setYolo(true);
-			// No explicit permission mode
 
 			CLIOptions options = properties.buildCLIOptions();
 			assertThat(options.getPermissionMode()).isEqualTo(PermissionMode.BYPASS_PERMISSIONS);
@@ -313,6 +313,89 @@ class ClaudeAgentPropertiesTest {
 	}
 
 	@Nested
+	@DisplayName("API Key and Base URL Tests")
+	class ApiKeyBaseUrlTests {
+
+		@Test
+		@DisplayName("Should set apiKey as ANTHROPIC_API_KEY env var")
+		void shouldSetApiKeyAsEnvVar() {
+			ClaudeAgentProperties properties = new ClaudeAgentProperties();
+			properties.setApiKey("sk-test-key");
+
+			CLIOptions options = properties.buildCLIOptions();
+			assertThat(options.getEnv()).containsEntry("ANTHROPIC_API_KEY", "sk-test-key");
+		}
+
+		@Test
+		@DisplayName("Should set baseUrl as ANTHROPIC_BASE_URL env var")
+		void shouldSetBaseUrlAsEnvVar() {
+			ClaudeAgentProperties properties = new ClaudeAgentProperties();
+			properties.setBaseUrl("https://proxy.example.com");
+
+			CLIOptions options = properties.buildCLIOptions();
+			assertThat(options.getEnv()).containsEntry("ANTHROPIC_BASE_URL", "https://proxy.example.com");
+		}
+
+		@Test
+		@DisplayName("Explicit apiKey should override env map ANTHROPIC_API_KEY")
+		void apiKeyOverridesEnvMap() {
+			ClaudeAgentProperties properties = new ClaudeAgentProperties();
+			properties.setEnv(Map.of("ANTHROPIC_API_KEY", "env-map-key"));
+			properties.setApiKey("explicit-key");
+
+			CLIOptions options = properties.buildCLIOptions();
+			assertThat(options.getEnv()).containsEntry("ANTHROPIC_API_KEY", "explicit-key");
+		}
+
+		@Test
+		@DisplayName("Explicit baseUrl should override env map ANTHROPIC_BASE_URL")
+		void baseUrlOverridesEnvMap() {
+			ClaudeAgentProperties properties = new ClaudeAgentProperties();
+			properties.setEnv(Map.of("ANTHROPIC_BASE_URL", "https://env-url.com"));
+			properties.setBaseUrl("https://explicit-url.com");
+
+			CLIOptions options = properties.buildCLIOptions();
+			assertThat(options.getEnv()).containsEntry("ANTHROPIC_BASE_URL", "https://explicit-url.com");
+		}
+
+		@Test
+		@DisplayName("Should work alongside other env vars")
+		void shouldWorkAlongsideOtherEnvVars() {
+			ClaudeAgentProperties properties = new ClaudeAgentProperties();
+			properties.setEnv(Map.of("CUSTOM_VAR", "custom-value"));
+			properties.setApiKey("sk-test");
+			properties.setBaseUrl("https://proxy.example.com");
+
+			CLIOptions options = properties.buildCLIOptions();
+			assertThat(options.getEnv()).containsEntry("CUSTOM_VAR", "custom-value");
+			assertThat(options.getEnv()).containsEntry("ANTHROPIC_API_KEY", "sk-test");
+			assertThat(options.getEnv()).containsEntry("ANTHROPIC_BASE_URL", "https://proxy.example.com");
+		}
+
+		@Test
+		@DisplayName("Null apiKey and baseUrl should not add env entries")
+		void nullValuesShouldNotAddEnvEntries() {
+			ClaudeAgentProperties properties = new ClaudeAgentProperties();
+
+			CLIOptions options = properties.buildCLIOptions();
+			assertThat(options.getEnv()).isNullOrEmpty();
+		}
+
+		@Test
+		@DisplayName("Blank apiKey and baseUrl should not add env entries")
+		void blankValuesShouldNotAddEnvEntries() {
+			ClaudeAgentProperties properties = new ClaudeAgentProperties();
+			properties.setApiKey("   ");
+			properties.setBaseUrl("   ");
+
+			CLIOptions options = properties.buildCLIOptions();
+			assertThat(options.getEnv()).doesNotContainKey("ANTHROPIC_API_KEY");
+			assertThat(options.getEnv()).doesNotContainKey("ANTHROPIC_BASE_URL");
+		}
+
+	}
+
+	@Nested
 	@DisplayName("Build CLI Options Tests")
 	class BuildCLIOptionsTests {
 
@@ -329,7 +412,6 @@ class ClaudeAgentPropertiesTest {
 			properties.setDisallowedTools(List.of("WebSearch"));
 			properties.setPermissionMode("acceptEdits");
 			properties.setJsonSchema(Map.of("type", "object"));
-			// New budget control and fallback model properties
 			properties.setMaxTurns(10);
 			properties.setMaxBudgetUsd(0.50);
 			properties.setFallbackModel("claude-haiku-3-5-20241022");
@@ -346,7 +428,6 @@ class ClaudeAgentPropertiesTest {
 			assertThat(options.getDisallowedTools()).containsExactly("WebSearch");
 			assertThat(options.getPermissionMode()).isEqualTo(PermissionMode.ACCEPT_EDITS);
 			assertThat(options.getJsonSchema()).isEqualTo(Map.of("type", "object"));
-			// New budget control and fallback model assertions
 			assertThat(options.getMaxTurns()).isEqualTo(10);
 			assertThat(options.getMaxBudgetUsd()).isEqualTo(0.50);
 			assertThat(options.getFallbackModel()).isEqualTo("claude-haiku-3-5-20241022");
