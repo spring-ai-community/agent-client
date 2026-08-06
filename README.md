@@ -1,3 +1,14 @@
+> [!IMPORTANT]
+> **This repository is no longer maintained.**
+>
+> Active development has moved to
+> [markpollack/agent-client](https://github.com/markpollack/agent-client).
+> Current documentation is available at [lab.pollack.ai](https://lab.pollack.ai/projects/agent-client).
+>
+> This repository remains available for historical Spring AI Community releases.
+> Its Apache 2.0 license and historical contents are unchanged. Please submit new
+> issues and pull requests to the active repository.
+
 # Agent Client
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.springaicommunity.agents/agent-starter-claude.svg)](https://search.maven.org/search?q=g:org.springaicommunity.agents)
